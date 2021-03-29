@@ -1,0 +1,11 @@
+---
+title: "Proposal.Rmd"
+author: "Group Members: Julia Lundstrum, Nikole Slinger, Dana Thacker, Andrew Fahmy, and Zack Larson"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Group 7 Final Project Proposal
