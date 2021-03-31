@@ -9,3 +9,21 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Group 7 Final Project Proposal
+## Sources
+1. Covid cases by state: https://www.kff.org/other/state-indicator/cumulative-covid-19-cases-and-deaths/?currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D
+
+2. Covid Vaccine data(VAERS Data,Symptoms, and Vaccine datasets from 2021): https://vaers.hhs.gov/data/datasets.html?
+
+## Overview
+The first data set contains the total number of Covid cases and deaths per state along with the number of Covid cases and fatality rate per 1,000,000 people. The VAERS Data data set contains information on the patient's medical history and general medical information(i.e. gender) in addition to state of residence. The information we will use from the VAERS Symptoms data set includes the symptoms each patient experienced. The VAERS Vaccine data set includes the manufacturers of the vaccine and how many doses each one administered. 
+
+## Exploratory Analysis
+1. What's the most common symptom to experience for each manufacturer?
+2. Compare Covid case cases per state in contrast to the number of vaccines administered by state
+3. Compare a patient's medical history with their symptoms from the vaccine they received
+4. Which states have the highest and lowest number of Covid cases and fatality rate?
+5. What patterns are shown when looking at a patient's death (post vaccine) and the reasons why they might have died?
+6. What age group has gotten the most vaccines?
+7. What is the most popular vaccine manufacturer per state?
+8. Is there a trend on the number of vaccines administered per day? By state and nation wide?
+We can break these questions down even further when looking at age brackets and gender
