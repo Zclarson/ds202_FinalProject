@@ -9,3 +9,58 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Julia - 2
+Andrew - 8
+Dana - 7, 3
+Nikole - 6, 1
+Zack - 4, 5
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+raw_data <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='raw_data')
+VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA')
+VAERSsymptoms <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSSymptoms')
+VAERSVax <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSVax')
+```
+
+**1. What's the most common symptom to experience for each manufacturer?**
+```{r}
+
+```
+
+**2. Compare Covid case cases per state in contrast to the number of vaccines administered by state**
+```{r}
+
+```
+
+**3. Compare a patient's medical history with their symptoms from the vaccine they received**
+```{r}
+
+```
+
+**4. Which states have the highest and lowest number of Covid cases and fatality rate?**
+```{r}
+
+```
+
+**5. What patterns are shown when looking at a patient's death (post vaccine) and the reasons why they might have died?**
+```{r}
+
+```
+
+**6. What age group has gotten the most vaccines?**
+```{r}
+
+```
+
+**7. What is the most popular vaccine manufacturer per state?**
+```{r}
+
+```
+
+**8. Is there a trend on the number of vaccines administered per day? By state and nation wide?**
+```{r}
+
+```
