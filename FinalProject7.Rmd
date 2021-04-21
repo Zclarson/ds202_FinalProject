@@ -18,10 +18,11 @@ knitr::opts_chunk$set(echo = TRUE)
 7 - Dana
 8 - Andrew
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 library(ggplot2)
 library(tidyverse)
 library(readxl)
+
 raw_data <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='raw_data')
 VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA')
 VAERSsymptoms <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSSymptoms')
@@ -31,6 +32,10 @@ state <- map_data("state")
 
 **1. What's the most common symptom to experience for each manufacturer?**
 ```{r}
+# joining vax and symptom data, only need id, vaccine manu, and symptoms
+symptoms <- VAERSVax %>% full_join(VAERSsymptoms, by = 'VAERS_ID') %>%
+  filter(VAX_TYPE == 'COVID19') %>%
+  select(VAERS_ID, VAX_MANU, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
 
 ```
 
@@ -70,7 +75,25 @@ nausea <- medHist %>%
 
 **6. What age group has gotten the most vaccines?**
 ```{r}
-
+# joining general patient data and vax data
+age <- VAERSdata %>% full_join(VAERSVax, by = 'VAERS_ID') %>%
+  select(VAERS_ID, VAX_MANU, AGE_YRS)
+# adding 10 year age group column to sort ages
+age <- age %>%
+  mutate(AGE_GROUP = ifelse(AGE_YRS %in% 0:18, '0 to 18',
+                     ifelse(AGE_YRS %in% 19:29, '19 to 29',
+                     ifelse(AGE_YRS %in% 30:49, '30 to 39',
+                     ifelse(AGE_YRS %in% 40:49, '40 to 49',
+                     ifelse(AGE_YRS %in% 50:59, '50 to 59',
+                     ifelse(AGE_YRS %in% 60:69, '60 to 69', 
+                     ifelse(AGE_YRS %in% 70:79, '70 to 79', 
+                     ifelse(AGE_YRS %in% 80:89, '80 to 89', 'Over 90')))))))))
+# plotting visual representation
+ggplot(age, aes(x = AGE_GROUP)) + geom_bar(fill = 'steelblue') +
+  ggtitle('Number of Vaccinations per Age Groups') +
+  xlab('Age Group (years)') + ylab('Count')
+# numerical stats
+table(age$AGE_GROUP)
 ```
 
 **7. What is the most popular vaccine manufacturer per state? Dana**
