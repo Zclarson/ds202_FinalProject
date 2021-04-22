@@ -28,7 +28,7 @@ VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA
 VAERSsymptoms <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSSymptoms')
 VAERSVax <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSVax')
 state <- map_data("state")
-StateCounty <- readxl::read_xlsx('FRPP_GLC_-_United_StATESaPRIL122021.xlsx')
+abbrev <- read.csv("csvData.csv", stringsAsFactors = FALSE)
 ```
 
 **1. What's the most common symptom to experience for each manufacturer?**
@@ -80,7 +80,43 @@ topHist <- top_n(medHist2, 18) %>%
   'unknown', 'medical history/concurrent conditions: no adverse event (no reported medical history)'))
 topHist <- na.omit(topHist)
 
+topHist <- topHist %>%
+  mutate(conditionHist = if_else(conditionHist == 'htn', 'hypertension', conditionHist))
 
+topHist[8,2] <- topHist[8,2] + topHist[10,2]
+
+topHist <- topHist[-10, ]
+
+#Filtering the medical history dataset such that I only have the top 10 medical conditions and the covid vaccination symptoms of those conditions
+medHist3 <- medHist %>%
+  filter(history1 %in% c('anxiety', 'asthma', 'copd', 'depression', 'diabetes', 'gerd', 'high blood pressure',
+                         'hypertension', 'htn', 'hyperlipidemia', 'hypothyroidism')) %>%
+  select(-history2, -history3, -history4, -history5, -history6, -history7, -history8, -history9, -history10) %>%
+  rename('MedHist' = 'history1')
+
+medHist3 <- medHist3 %>%
+  mutate(MedHist = if_else(MedHist == 'htn', 'hypertension', MedHist))
+
+#Learning about what the top symptoms are for each medical history
+symptom1 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM1) %>%
+  summarise(symptomCount = n())
+
+symptom2 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM2) %>%
+  summarise(symptomCount = n())
+
+symptom3 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM3) %>%
+  summarise(symptomCount = n())
+
+symptom4 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM4) %>%
+  summarise(symptomCount = n())
+
+symptom5 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM5) %>%
+  summarise(symptomCount = n())
 ```
 
 **4. Which states have the highest and lowest number of Covid cases and fatality rate?**
@@ -129,20 +165,30 @@ perState <- VAERSVax %>% full_join(VAERSdata) %>%
 topPerState <- top_n(perState, 1) %>%
   select(-popular) 
 topPerState <- na.omit(topPerState) %>%
-  filter(STATE %notin% c('AS', 'Ca', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'VI', 'XB'))
+  filter(STATE %notin% c('AS', 'Ca', 'FM', 'GU', 'MH', 'MP', 'PR', 'VI', 'XB'))
 head(topPerState, 10)
 
 #Visualizing what manufacturers are the most distributed in different states
 ggplot(topPerState, aes(x = VAX_MANU)) + geom_bar() + xlab("Top Vaccine Manufacturers") + ylab("Number of States") + ggtitle("Number of States with Each Vaccine as the Most Distributed Vaccine")
 
-#
+#Creating a Map visualization of which states have each vaccine as the top manufacturer based on number administered
+abbrev$State <- toupper(abbrev$State)
+
 state1 <- state %>%
-  select(long, lat, region)
+  select(long, lat, region, group)
 
 state1$region <- toupper(state1$region)
 
-ggplot(state, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) 
+stAbbrev <- state1 %>% right_join(abbrev, by = c('region' = 'State'))
+stAbbrev <- stAbbrev %>%
+  select(-Abbrev)
 
+stAbbrevManu <- stAbbrev %>% right_join(topPerState, by = c('Code' = 'STATE'))
+
+stAbbrevManu <- stAbbrevManu %>%
+  mutate(VAX_MANU = as.factor(VAX_MANU))
+
+ggplot(stAbbrevManu, aes(x = long, y = lat)) + geom_polygon(aes(group = group, fill = VAX_MANU)) + xlab("Longitude") + ylab("Latitude") + ggtitle("United States Top Vaccine Manufacturers by Number of Administered Doses per State")
 ```
 
 The most widely administered vaccine in any given state from the beginning of vaccine administering through March 19, 2021 is either Moderna or Pfizer/Biontech. The most popular vaccine in Iowa as of March 19 was Moderna. Moderna is slightly more common as the most popular vaccine as it was the most popular in 27 states and Pfizer/Biontech was the most popular in 23. 
