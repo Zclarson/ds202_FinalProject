@@ -28,6 +28,7 @@ VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA
 VAERSsymptoms <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSSymptoms')
 VAERSVax <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSVax')
 state <- map_data("state")
+StateCounty <- readxl::read_xlsx('FRPP_GLC_-_United_StATESaPRIL122021.xlsx')
 ```
 
 **1. What's the most common symptom to experience for each manufacturer?**
@@ -44,23 +45,42 @@ symptoms <- VAERSVax %>% full_join(VAERSsymptoms, by = 'VAERS_ID') %>%
 
 ```
 
-**3. Compare a patient's medical history with their symptoms from the vaccine they received. Dana**
+**3. Compare a patient's medical history with their symptoms from the vaccine they received.**
 ```{r}
-#Join VAERSsymptoms and VAERSdata
+#Join VAERSsymptoms and VAERSdata, only need ID, all 5 symptoms, and patient history
+#Then cleaning the history column to create uniformity
 medHist <- VAERSsymptoms %>% full_join(VAERSdata) %>%
   select(VAERS_ID, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5, HISTORY) %>%
-  separate(HISTORY, c('history1', 'history2'), sep = ', ') %>%
-  filter(history1 %in% c('None', 'none', 'anxiexy', 'depression', 'Anxiety', 'Depression', 'obesity', 'Obesity',
-                         'hypertension', 'Hypertension', 'hypothyroidism', 'Hypothyroidism', 'asthma', 'Asthma',
-                         'anorexia', 'Anorexia', 'osteoarthritis', 'Osteoarthritis', 'PTSD', 'migraines', 'Migraines', 'NA',
-                         'No', 'N/A', 'n/a', 'High blood pressure') & history2 %in% c('None', 'none', 'anxiexy',
-                          'depression', 'Anxiety', 'Depression', 'obesity', 'Obesity',
-                          'hypertension', 'Hypertension', 'hypothyroidism', 'Hypothyroidism', 'asthma', 'Asthma',
-                         'anorexia', 'Anorexia', 'osteoarthritis', 'Osteoarthritis', 'PTSD', 'migraines', 'Migraines', 'NA',
-                         'No', 'N/A', 'n/a', 'High blood pressure'))
+  separate(HISTORY, c('history1', 'history2', 'history3', 'history4', 'history5', 'history6', 'history7', 'history8', 
+                      'history9', 'history10'), sep = ', ') %>%
+  mutate(history1 = tolower(history1), 
+         history2 = tolower(history2),
+         history3 = tolower(history3),
+         history4 = tolower(history4),
+         history5 = tolower(history5),
+         history6 = tolower(history6),
+         history7 = tolower(history7),
+         history8 = tolower(history8),
+         history9 = tolower(history9),
+         history10 = tolower(history10))
 
-nausea <- medHist %>%
-  filter(SYMPTOM1 == 'Nausea' | SYMPTOM2 == 'Nausea' | SYMPTOM3 == 'Nausea' | SYMPTOM4 == 'Nausea' | SYMPTOM5 == 'Nausea')
+#Summarising medical history to find how often each history diagnosis appears in the dataset
+medHist2 <- medHist %>%
+  pivot_longer(history1:history10, names_to='histName', values_to='conditionHist') %>%
+  group_by(conditionHist) %>%
+  summarise(count = n())
+
+#Creating a negation of the %in% to use in analysis
+`%notin%` <- Negate(`%in%`)
+
+#Finding the top 10, not including 5 null or 'none', medical history conditions
+topHist <- top_n(medHist2, 18) %>%
+  filter(conditionHist %notin% c('none', 
+  'comments: list of non-encoded patient relevant history: patient other relevant history 1: none', 'n/a', 'no',
+  'unknown', 'medical history/concurrent conditions: no adverse event (no reported medical history)'))
+topHist <- na.omit(topHist)
+
+
 ```
 
 **4. Which states have the highest and lowest number of Covid cases and fatality rate?**
@@ -96,21 +116,36 @@ ggplot(age, aes(x = AGE_GROUP)) + geom_bar(fill = 'steelblue') +
 table(age$AGE_GROUP)
 ```
 
-**7. What is the most popular vaccine manufacturer per state? Dana**
+**7. What is the most popular vaccine manufacturer per state?**
 ```{r}
+# Joining vaccine dataset with 'data' dataset, only need state, ID number, and vaccine manufacturer
+#Summarizing such that the number of each type of vaccine will be counted in each state
 perState <- VAERSVax %>% full_join(VAERSdata) %>%
   select(VAERS_ID, STATE, VAX_MANU) %>%
   group_by(STATE, VAX_MANU) %>%
   summarise(popular = n())
 
+#Selecting the top vaccine distributor for each state
 topPerState <- top_n(perState, 1) %>%
-  select(-popular)
+  select(-popular) 
+topPerState <- na.omit(topPerState) %>%
+  filter(STATE %notin% c('AS', 'Ca', 'DC', 'FM', 'GU', 'MH', 'MP', 'PR', 'VI', 'XB'))
 head(topPerState, 10)
 
+#Visualizing what manufacturers are the most distributed in different states
 ggplot(topPerState, aes(x = VAX_MANU)) + geom_bar() + xlab("Top Vaccine Manufacturers") + ylab("Number of States") + ggtitle("Number of States with Each Vaccine as the Most Distributed Vaccine")
+
+#
+state1 <- state %>%
+  select(long, lat, region)
+
+state1$region <- toupper(state1$region)
+
+ggplot(state, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) 
+
 ```
 
-The most widely administered vaccine in any given state from the beginning of vaccine administering through March 19, 2021 is either Moderna or Pfizer/Biontech. The most popular vaccine in Iowa as of March 19 was Moderna. Pfizer/Biontech is slightly more common as the most popular vaccine as it was the most popular in 32 states or regions and Moderna was the most popular in 32. 
+The most widely administered vaccine in any given state from the beginning of vaccine administering through March 19, 2021 is either Moderna or Pfizer/Biontech. The most popular vaccine in Iowa as of March 19 was Moderna. Moderna is slightly more common as the most popular vaccine as it was the most popular in 27 states and Pfizer/Biontech was the most popular in 23. 
 
 **8. Is there a trend on the number of vaccines administered per day? By state and nation wide?**
 ```{r}
