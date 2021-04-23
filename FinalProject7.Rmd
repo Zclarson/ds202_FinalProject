@@ -40,6 +40,35 @@ symptoms <- VAERSVax %>% full_join(VAERSsymptoms, by = 'VAERS_ID') %>%
   filter(VAX_TYPE == 'COVID19') %>%
   select(VAERS_ID, VAX_MANU, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
 
+moderna <- symptoms %>%
+  filter(VAX_MANU == 'MODERNA')
+moderna <- as.data.frame(sort(table(moderna$SYMPTOM1), decreasing = TRUE) [1:5])
+
+pfizer <- symptoms %>%
+  filter(VAX_MANU == 'PFIZER\\BIONTECH')
+pfizer <- as.data.frame(sort(table(pfizer$SYMPTOM1), decreasing = TRUE) [1:5])
+
+janssen <- symptoms %>%
+  filter(VAX_MANU == 'JANSSEN')
+janssen <- as.data.frame(sort(table(janssen$SYMPTOM1), decreasing = TRUE) [1:5])
+
+# moderna table
+ggplot(moderna, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'steelblue') +
+  ggtitle('Most Common Symptoms from Moderna Vaccine') +
+  xlab('Symptom') + ylab('Count')
+moderna
+
+# pfizer table
+ggplot(pfizer, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'steelblue') +
+  ggtitle('Most Common Symptoms from Pfizer Vaccine') +
+  xlab('Symptom') + ylab('Count')
+pfizer
+
+# janssen table
+ggplot(janssen, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'steelblue') +
+  ggtitle('Most Common Symptoms from Janssen Vaccine') +
+  xlab('Symptom') + ylab('Count')
+janssen
 ```
 
 **2. Compare Covid case cases per state in contrast to the number of vaccines administered by state**
