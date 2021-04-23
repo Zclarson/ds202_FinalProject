@@ -131,12 +131,61 @@ symptom5 <- medHist3 %>%
 
 **4. Which states have the highest and lowest number of Covid cases and fatality rate?**
 ```{r}
+raw_data2 <- raw_data
+names(raw_data2)<-str_replace_all(names(raw_data2), c(" " = "."))##Column names were not ideal with numbers,commas,dashes
+names(raw_data2)<-str_replace_all(names(raw_data2), c("," = "_"))
+names(raw_data2)<-str_replace_all(names(raw_data2), c("-19" = ""))
+highestCovidCasesStates <- raw_data2
+highestCovidCasesStates$COVID.Cases.per.1_000_000.Population <- as.numeric(highestCovidCasesStates$COVID.Cases.per.1_000_000.Population)
+highestCovidCasesStates <- highestCovidCasesStates[order(highestCovidCasesStates$COVID.Cases.per.1_000_000.Population,decreasing = TRUE),]
+highestCovidCasesStates <- highestCovidCasesStates %>% filter(COVID.Cases.per.1_000_000.Population != 'N/A') %>%
+  select(Location,COVID.Cases.per.1_000_000.Population)
+highestCovidCasesStates
 
+lowestCovidCasesStates <- raw_data2
+lowestCovidCasesStates$COVID.Cases.per.1_000_000.Population <- as.numeric(lowestCovidCasesStates$COVID.Cases.per.1_000_000.Population)
+lowestCovidCasesStates <- lowestCovidCasesStates[order(lowestCovidCasesStates$COVID.Cases.per.1_000_000.Population),]
+lowestCovidCasesStates <- lowestCovidCasesStates %>% filter(COVID.Cases.per.1_000_000.Population != 'N/A') %>%
+  select(Location,COVID.Cases.per.1_000_000.Population)
+lowestCovidCasesStates
+
+highestCovidDeathsStates <- raw_data2
+highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population <- as.numeric(highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population)
+highestCovidDeathsStates <- highestCovidDeathsStates[order(highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population,decreasing = TRUE),]
+highestCovidDeathsStates <- highestCovidDeathsStates %>% filter(COVID.Deaths.per.1_000_000.Population != 'N/A') %>%
+  select(Location,COVID.Deaths.per.1_000_000.Population)
+highestCovidDeathsStates
+
+lowestCovidDeathsStates <- raw_data2
+lowestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population <- as.numeric(lowestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population)
+lowestCovidDeathsStates <- lowestCovidDeathsStates[order(lowestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population),]
+lowestCovidDeathsStates <- lowestCovidDeathsStates %>% filter(COVID.Deaths.per.1_000_000.Population != 'N/A') %>%
+  select(Location,COVID.Deaths.per.1_000_000.Population)
+lowestCovidDeathsStates 
 ```
 
 **5. What patterns are shown when looking at a patient's death (post vaccine) and the reasons why they might have died?**
 ```{r}
+#Age
+deathAfterVax <- VAERSdata %>% filter(DIED=='Y')
+deathAfterVaxAge <- deathAfterVax %>% count(AGE_YRS)
+deathAfterVaxAge
+ggplot(deathAfterVaxAge,aes(x=AGE_YRS,y=n)) + geom_col()
 
+#Gender
+deathAfterVaxSex <- deathAfterVax %>% count(SEX)
+deathAfterVaxSex
+ggplot(deathAfterVaxSex,aes(x=SEX,y=n)) + geom_col()
+
+#Common symptoms after vax in deaths
+deathSymptoms <- deathAfterVax %>% left_join(VAERSsymptoms, by = 'VAERS_ID') %>% group_by(VAERS_ID) %>%
+  select(VAERS_ID, AGE_YRS, SEX, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
+
+tail(names(sort(table(deathSymptoms$SYMPTOM1))), 5)
+tail(names(sort(table(deathSymptoms$SYMPTOM2))), 5)
+tail(names(sort(table(deathSymptoms$SYMPTOM3))), 5)
+tail(names(sort(table(deathSymptoms$SYMPTOM4))), 5)
+tail(names(sort(table(deathSymptoms$SYMPTOM5))), 5)
 ```
 
 **6. What age group has gotten the most vaccines?**
