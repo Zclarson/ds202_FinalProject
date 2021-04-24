@@ -140,22 +140,29 @@ medHist3 <- medHist3 %>%
 symptom1 <- medHist3 %>%
   group_by(MedHist, SYMPTOM1) %>%
   summarise(symptomCount = n())
+symptom1 <- na.omit(symptom1)
 
 symptom2 <- medHist3 %>%
   group_by(MedHist, SYMPTOM2) %>%
   summarise(symptomCount = n())
+symptom2 <- na.omit(symptom2)
 
 symptom3 <- medHist3 %>%
   group_by(MedHist, SYMPTOM3) %>%
   summarise(symptomCount = n())
+symptom3 <- na.omit(symptom3)
 
 symptom4 <- medHist3 %>%
   group_by(MedHist, SYMPTOM4) %>%
   summarise(symptomCount = n())
+symptom4 <- na.omit(symptom4)
 
 symptom5 <- medHist3 %>%
   group_by(MedHist, SYMPTOM5) %>%
   summarise(symptomCount = n())
+symptom5 <- na.omit(symptom5)
+
+#Now I want to filter each of them so that I only have the top symptom per medical history thing for each dataframe, then compare those dataframes to see the top symptom for each medical history thing
 ```
 
 **4. Which states have the highest and lowest number of Covid cases and fatality rate?**
