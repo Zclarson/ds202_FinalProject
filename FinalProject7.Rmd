@@ -162,7 +162,22 @@ symptom5 <- medHist3 %>%
   summarise(symptomCount = n())
 symptom5 <- na.omit(symptom5)
 
-#Now I want to filter each of them so that I only have the top symptom per medical history thing for each dataframe, then compare those dataframes to see the top symptom for each medical history thing
+#Selecting only the top symptom for each medical history condition for each symptom dataset
+symptom1 <- top_n(symptom1, 1)
+symptom2 <- top_n(symptom2, 1)
+symptom3 <- top_n(symptom3, 1)
+symptom4 <- top_n(symptom4, 1)
+symptom5 <- top_n(symptom5, 1)
+
+#Joining datasets to create only one symptom dataset with the top symptoms from each symptom 1-5
+allSympt <- symptom1 %>% full_join(symptom2)
+allSympt <- allSympt %>% full_join(symptom3)
+allSympt <- allSympt %>% full_join(symptom4)
+allSympt <- allSympt %>% full_join(symptom5)
+
+#Selecting only the top symptoms when comparing symptoms 1-5
+topAllSympt <- top_n(allSympt, 1, symptomCount)
+head(topAllSympt, 10)
 ```
 
 **4. Which states have the highest and lowest number of Covid cases and fatality rate?**
