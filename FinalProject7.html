@@ -362,7 +362,43 @@ symptom5 &lt;- medHist3 %&gt;%
 <pre><code>## `summarise()` has grouped output by &#39;MedHist&#39;. You can override using the `.groups` argument.</code></pre>
 <pre class="r"><code>symptom5 &lt;- na.omit(symptom5)
 
-#Now I want to filter each of them so that I only have the top symptom per medical history thing for each dataframe, then compare those dataframes to see the top symptom for each medical history thing</code></pre>
+#Selecting only the top symptom for each medical history condition for each symptom dataset
+symptom1 &lt;- top_n(symptom1, 1)</code></pre>
+<pre><code>## Selecting by symptomCount</code></pre>
+<pre class="r"><code>symptom2 &lt;- top_n(symptom2, 1)</code></pre>
+<pre><code>## Selecting by symptomCount</code></pre>
+<pre class="r"><code>symptom3 &lt;- top_n(symptom3, 1)</code></pre>
+<pre><code>## Selecting by symptomCount</code></pre>
+<pre class="r"><code>symptom4 &lt;- top_n(symptom4, 1)</code></pre>
+<pre><code>## Selecting by symptomCount</code></pre>
+<pre class="r"><code>symptom5 &lt;- top_n(symptom5, 1)</code></pre>
+<pre><code>## Selecting by symptomCount</code></pre>
+<pre class="r"><code>#Joining datasets to create only one symptom dataset with the top symptoms from each symptom 1-5
+allSympt &lt;- symptom1 %&gt;% full_join(symptom2)</code></pre>
+<pre><code>## Joining, by = c(&quot;MedHist&quot;, &quot;symptomCount&quot;)</code></pre>
+<pre class="r"><code>allSympt &lt;- allSympt %&gt;% full_join(symptom3)</code></pre>
+<pre><code>## Joining, by = c(&quot;MedHist&quot;, &quot;symptomCount&quot;)</code></pre>
+<pre class="r"><code>allSympt &lt;- allSympt %&gt;% full_join(symptom4)</code></pre>
+<pre><code>## Joining, by = c(&quot;MedHist&quot;, &quot;symptomCount&quot;)</code></pre>
+<pre class="r"><code>allSympt &lt;- allSympt %&gt;% full_join(symptom5)</code></pre>
+<pre><code>## Joining, by = c(&quot;MedHist&quot;, &quot;symptomCount&quot;)</code></pre>
+<pre class="r"><code>#Selecting only the top symptoms when comparing symptoms 1-5
+topAllSympt &lt;- top_n(allSympt, 1, symptomCount)
+head(topAllSympt, 10)</code></pre>
+<pre><code>## # A tibble: 10 x 7
+## # Groups:   MedHist [10]
+##    MedHist       SYMPTOM1       symptomCount SYMPTOM2 SYMPTOM3 SYMPTOM4 SYMPTOM5
+##    &lt;chr&gt;         &lt;chr&gt;                 &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   
+##  1 anxiety       Chills                   14 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  2 asthma        Chills                   98 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  3 copd          Death                    17 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  4 diabetes      Chills                   22 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  5 gerd          Chills                   14 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  6 high blood p… Chills                   41 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  7 hyperlipidem… Injection sit…            6 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  8 hypertension  Chills                   72 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+##  9 hypothyroidi… Chills                   28 &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    
+## 10 depression    &lt;NA&gt;                     12 Headache &lt;NA&gt;     &lt;NA&gt;     Pyrexia</code></pre>
 <p><strong>4. Which states have the highest and lowest number of Covid cases and fatality rate?</strong></p>
 <pre class="r"><code>raw_data2 &lt;- raw_data
 names(raw_data2)&lt;-str_replace_all(names(raw_data2), c(&quot; &quot; = &quot;.&quot;))##Column names were not ideal with numbers,commas,dashes
