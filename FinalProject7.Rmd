@@ -77,7 +77,7 @@ cases <- raw_data %>%
   inner_join(cdcdoses, by = c("Location" = "State")) %>%
   mutate("Cases per 100,000" = `Number of COVID-19 Cases`/`Population`*100000) %>%
   mutate("Doses per 100,000" = `Doses`/`Population`*100000)
-casesmap <- cases %>% 
+casesmap <- cases %>%
   mutate("State Name" = tolower(`Location`)) %>%
   right_join(state, by = c("State Name" = "region"))
 ggplot(casesmap, aes(x=long, y = lat, fill = `Cases per 100,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 100,000 People by State")
@@ -90,9 +90,9 @@ ggplot(casesmap, aes(x=long, y = lat, fill = `Doses per 100,000`)) + geom_polygo
 #Then cleaning the history column to create uniformity
 medHist <- VAERSsymptoms %>% full_join(VAERSdata) %>%
   select(VAERS_ID, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5, HISTORY) %>%
-  separate(HISTORY, c('history1', 'history2', 'history3', 'history4', 'history5', 'history6', 'history7', 'history8', 
+  separate(HISTORY, c('history1', 'history2', 'history3', 'history4', 'history5', 'history6', 'history7', 'history8',
                       'history9', 'history10'), sep = ', ') %>%
-  mutate(history1 = tolower(history1), 
+  mutate(history1 = tolower(history1),
          history2 = tolower(history2),
          history3 = tolower(history3),
          history4 = tolower(history4),
@@ -114,7 +114,7 @@ medHist2 <- medHist %>%
 
 #Finding the top 10, not including 5 null or 'none', medical history conditions
 topHist <- top_n(medHist2, 18) %>%
-  filter(conditionHist %notin% c('none', 
+  filter(conditionHist %notin% c('none',
   'comments: list of non-encoded patient relevant history: patient other relevant history 1: none', 'n/a', 'no',
   'unknown', 'medical history/concurrent conditions: no adverse event (no reported medical history)'))
 topHist <- na.omit(topHist)
@@ -197,7 +197,7 @@ lowestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population <- as.numeric(lowe
 lowestCovidDeathsStates <- lowestCovidDeathsStates[order(lowestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population),]
 lowestCovidDeathsStates <- lowestCovidDeathsStates %>% filter(COVID.Deaths.per.1_000_000.Population != 'N/A') %>%
   select(Location,COVID.Deaths.per.1_000_000.Population)
-lowestCovidDeathsStates 
+lowestCovidDeathsStates
 ```
 
 **5. What patterns are shown when looking at a patient's death (post vaccine) and the reasons why they might have died?**
@@ -236,8 +236,8 @@ age <- age %>%
                      ifelse(AGE_YRS %in% 30:49, '30 to 39',
                      ifelse(AGE_YRS %in% 40:49, '40 to 49',
                      ifelse(AGE_YRS %in% 50:59, '50 to 59',
-                     ifelse(AGE_YRS %in% 60:69, '60 to 69', 
-                     ifelse(AGE_YRS %in% 70:79, '70 to 79', 
+                     ifelse(AGE_YRS %in% 60:69, '60 to 69',
+                     ifelse(AGE_YRS %in% 70:79, '70 to 79',
                      ifelse(AGE_YRS %in% 80:89, '80 to 89', 'Over 90')))))))))
 # plotting visual representation
 ggplot(age, aes(x = AGE_GROUP)) + geom_bar(fill = 'steelblue') +
@@ -258,7 +258,7 @@ perState <- VAERSVax %>% full_join(VAERSdata) %>%
 
 #Selecting the top vaccine distributor for each state
 topPerState <- top_n(perState, 1) %>%
-  select(-popular) 
+  select(-popular)
 topPerState <- na.omit(topPerState) %>%
   filter(STATE %notin% c('AS', 'Ca', 'FM', 'GU', 'MH', 'MP', 'PR', 'VI', 'XB'))
 head(topPerState, 10)
@@ -286,9 +286,66 @@ stAbbrevManu <- stAbbrevManu %>%
 ggplot(stAbbrevManu, aes(x = long, y = lat)) + geom_polygon(aes(group = group, fill = VAX_MANU)) + xlab("Longitude") + ylab("Latitude") + ggtitle("United States Top Vaccine Manufacturers by Number of Administered Doses per State")
 ```
 
-The most widely administered vaccine in any given state from the beginning of vaccine administering through March 19, 2021 is either Moderna or Pfizer/Biontech. The most popular vaccine in Iowa as of March 19 was Moderna. Moderna is slightly more common as the most popular vaccine as it was the most popular in 27 states and Pfizer/Biontech was the most popular in 23. 
+The most widely administered vaccine in any given state from the beginning of vaccine administering through March 19, 2021 is either Moderna or Pfizer/Biontech. The most popular vaccine in Iowa as of March 19 was Moderna. Moderna is slightly more common as the most popular vaccine as it was the most popular in 27 states and Pfizer/Biontech was the most popular in 23.
 
 **8. Is there a trend on the number of vaccines administered per day? By state and nation wide?**
 ```{r}
+# Date frame that has vaccine date, and the state it was administered in
+vaxinfo <- VAERSdata %>%
+    inner_join(VAERSVax, by = "VAERS_ID") %>%
+    mutate(VAX_DATE = as.Date(VAX_DATE)) %>%
+    filter(VAX_TYPE == "COVID19",
+           VAX_DATE > as.Date("2018-01-01"),
+           !is.na(STATE)) %>%
+    select(VAERS_ID, VAX_DATE, STATE)
 
+#str(vaxinfo)
+
+vaxinfo_daily <- vaxinfo %>%
+    group_by(VAX_DATE) %>%
+    summarise(DAILY_TOTAL = n())
+
+vaxinfo_daily_state <- vaxinfo %>%
+    group_by(VAX_DATE, STATE) %>%
+    summarise(DAILY_TOTAL = n())
+
+vaxinfo_state <- vaxinfo %>%
+    group_by(STATE) %>%
+    summarise(TOTAL = n(), PEAK = mean(VAX_DATE))
+
+#str(vaxinfo_daily_state)
+
+#vaxinfo_daily %>%
+#    ggplot(aes(x = VAX_DATE, y = DAILY_TOTAL)) +
+#    geom_line()
+
+vaxinfo_daily %>%
+    filter(VAX_DATE > as.Date("2021-01-01")) %>%
+    ggplot(aes(x = VAX_DATE, y = DAILY_TOTAL)) +
+    geom_line()
+
+vaxinfo_daily_state %>%
+    filter(VAX_DATE > as.Date("2020-12-01")) %>%
+    ggplot(aes(x = VAX_DATE, y = DAILY_TOTAL, color = STATE)) +
+    geom_line()
+
+#str(state)
+#str(abbrev)
+
+dat <- abbrev %>%
+    mutate(State = tolower(State)) %>%
+    left_join(state, by = c("State" = "region")) %>%
+    right_join(vaxinfo_state, by = c("Code" = "STATE"))
+
+str(dat)
+
+ggplot(dat, aes(x = long, y = lat)) +
+    geom_polygon(aes(group = group, fill = TOTAL), olor = "white", size = 0.1) +
+    coord_map() +
+    scale_color_gradient(low = "#ff0000", high = "#0000ff")
+
+ggplot(dat, aes(x = long, y = lat, group = group, fill = PEAK)) +
+    geom_polygon(color = "white", size = 0.1) +
+    scale_color_gradient(low = "#ff0000", high = "#0000ff") +
+    coord_map()
 ```
