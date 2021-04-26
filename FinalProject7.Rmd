@@ -23,6 +23,7 @@ library(ggplot2)
 library(tidyverse)
 library(readxl)
 library(ggthemes)
+library(mapproj)
 
 raw_data <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='raw_data')
 VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA')
@@ -75,13 +76,14 @@ janssen
 ```{r}
 cases <- raw_data %>%
   inner_join(cdcdoses, by = c("Location" = "State")) %>%
-  mutate("Cases per 100,000" = `Number of COVID-19 Cases`/`Population`*100000) %>%
-  mutate("Doses per 100,000" = `Doses`/`Population`*100000)
+  mutate("Cases per 10,000" = `Number of COVID-19 Cases`/`Population`*10000) %>%
+  mutate("Fully Vaccinated per 10,000" = `Fully Vaccinated in March`/`Population`*10000)
+View(cases)
 casesmap <- cases %>%
   mutate("State Name" = tolower(`Location`)) %>%
   right_join(state, by = c("State Name" = "region"))
-ggplot(casesmap, aes(x=long, y = lat, fill = `Cases per 100,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 100,000 People by State")
-ggplot(casesmap, aes(x=long, y = lat, fill = `Doses per 100,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("Vaccine Doses per 100,000 People by State")
+ggplot(casesmap, aes(x=long, y = lat, fill = `Cases per 10,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 10,000 People by State")
+ggplot(casesmap, aes(x=long, y = lat, fill = `Fully Vaccinated per 10,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("Number of People Fully Vaccinated per 10,000 by State")
 ```
 
 **3. Compare a patient's medical history with their symptoms from the vaccine they received.**
