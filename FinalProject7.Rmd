@@ -250,7 +250,7 @@ age <- VAERSdata %>% full_join(VAERSVax, by = 'VAERS_ID') %>%
 age <- age %>%
   mutate(AGE_GROUP = ifelse(AGE_YRS %in% 0:18, '0 to 18',
                      ifelse(AGE_YRS %in% 19:29, '19 to 29',
-                     ifelse(AGE_YRS %in% 30:49, '30 to 39',
+                     ifelse(AGE_YRS %in% 30:39, '30 to 39',
                      ifelse(AGE_YRS %in% 40:49, '40 to 49',
                      ifelse(AGE_YRS %in% 50:59, '50 to 59',
                      ifelse(AGE_YRS %in% 60:69, '60 to 69',
