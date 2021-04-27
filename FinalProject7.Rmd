@@ -202,6 +202,12 @@ lowestCovidCasesStates <- lowestCovidCasesStates %>% filter(COVID.Cases.per.1_00
   select(Location,COVID.Cases.per.1_000_000.Population)
 lowestCovidCasesStates
 
+casesStateMap <- highestCovidCasesStates %>%
+  mutate("State Name" = tolower(`Location`)) %>%
+  right_join(state, by = c("State Name" = "region"))
+
+ggplot(casesStateMap, aes(x=long, y = lat, fill=COVID.Cases.per.1_000_000.Population)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 1,000,000 People by State")
+
 highestCovidDeathsStates <- raw_data2
 highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population <- as.numeric(highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population)
 highestCovidDeathsStates <- highestCovidDeathsStates[order(highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population,decreasing = TRUE),]
@@ -215,6 +221,12 @@ lowestCovidDeathsStates <- lowestCovidDeathsStates[order(lowestCovidDeathsStates
 lowestCovidDeathsStates <- lowestCovidDeathsStates %>% filter(COVID.Deaths.per.1_000_000.Population != 'N/A') %>%
   select(Location,COVID.Deaths.per.1_000_000.Population)
 lowestCovidDeathsStates
+
+deathsStateMap <- highestCovidDeathsStates %>%
+  mutate("State Name" = tolower(`Location`)) %>%
+  right_join(state, by = c("State Name" = "region"))
+
+ggplot(deathsStateMap, aes(x=long, y = lat, fill=COVID.Deaths.per.1_000_000.Population)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Deaths per 1,000,000 People by State")
 ```
 
 **5. What patterns are shown when looking at a patient's death (post vaccine) and the reasons why they might have died?**
@@ -222,13 +234,12 @@ lowestCovidDeathsStates
 #Age
 deathAfterVax <- VAERSdata %>% filter(DIED=='Y')
 deathAfterVaxAge <- deathAfterVax %>% count(AGE_YRS)
-deathAfterVaxAge
-ggplot(deathAfterVaxAge,aes(x=AGE_YRS,y=n)) + geom_col()
+ggplot(deathAfterVaxAge,aes(x=AGE_YRS,y=n)) + geom_col() + ggtitle("Deaths after Vaccine by Age") + xlab("Age") + ylab("Number of Deaths after receiving a vaccine")
 
 #Gender
-deathAfterVaxSex <- deathAfterVax %>% count(SEX)
+deathAfterVaxSex <- deathAfterVax %>% count(SEX) %>% filter(SEX !='U')
 deathAfterVaxSex
-ggplot(deathAfterVaxSex,aes(x=SEX,y=n)) + geom_col()
+ggplot(deathAfterVaxSex,aes(x=SEX,y=n)) + geom_col() + ggtitle("Deaths after Vaccine by Gender") + xlab("Gender") + ylab("Number of Deaths after receiving a vaccine")
 
 #Common symptoms after vax in deaths
 deathSymptoms <- deathAfterVax %>% left_join(VAERSsymptoms, by = 'VAERS_ID') %>% group_by(VAERS_ID) %>%
