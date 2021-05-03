@@ -56,11 +56,74 @@ abbrev <- read.csv("csvData.csv", stringsAsFactors = FALSE)
 **How do Covid-19 cases compare to the number of vaccines administered per state?**
 
 
-**What age group has recieved the most vaccines?**
-
-
 **What is the most common symptom to experience for each manufacturer?**
 
+We then wanted to further explore the Covid-19 vaccine, specifically looking for the different symptoms that each vaccine is associated with. By joining the VAERS Vaccine data with the VAERS Symptoms data, we connected manufacturer's vaccine (Moderna, Pfizer, and Janssen) with the symptoms that patients had experienced afterwards. Rather than listing every possible symptom, we chose to focus on only the top five.
+
+```{r, echo=FALSE}
+# joining vax and symptom data, only need id, vaccine manu, and symptoms
+symptoms <- VAERSVax %>% full_join(VAERSsymptoms, by = 'VAERS_ID') %>%
+  filter(VAX_TYPE == 'COVID19') %>%
+  select(VAERS_ID, VAX_MANU, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
+
+moderna <- symptoms %>%
+  filter(VAX_MANU == 'MODERNA')
+moderna <- as.data.frame(sort(table(moderna$SYMPTOM1), decreasing = TRUE) [1:5])
+
+pfizer <- symptoms %>%
+  filter(VAX_MANU == 'PFIZER\\BIONTECH')
+pfizer <- as.data.frame(sort(table(pfizer$SYMPTOM1), decreasing = TRUE) [1:5])
+
+janssen <- symptoms %>%
+  filter(VAX_MANU == 'JANSSEN')
+janssen <- as.data.frame(sort(table(janssen$SYMPTOM1), decreasing = TRUE) [1:5])
+
+ggplot(moderna, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
+  ggtitle('Most Common Symptoms from Moderna Vaccine') +
+  xlab('Symptom') + ylab('Count')
+```
+
+Shown above are the reported symptoms after patients had received the Moderna vaccine. The most common symptom, chill, was reported by 1,476 people at the time our data was taken, while stiffness at the site of the vaccine injection (injection site erythema) was reported by 1,319 people. The remaining top symptoms include arthralgia (joint pain), headaches, and dizziness. Overall, symptoms from the Moderna vaccine seem relatively mild.
+
+```{r, echo=FALSE}
+ggplot(pfizer, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
+  ggtitle('Most Common Symptoms from Pfizer Vaccine') +
+  xlab('Symptom') + ylab('Count')
+```
+
+When looking at the symptoms from the Pfizer vaccine pictured above, we found that the symptoms that people had experienced were somewhat similar to those from the Moderna vaccine. Again, the top symptom reported was chills with 1,421 counts, this time followed by 957 reports of arthralgia. The other top symptoms include headaches, dizziness, and Covid-19 itself which was an interesting observation. However, we can't assume Covid-19 in the patient was caused by the vaccine and one possible reason for this to occur as a symptom may have been that the patient already had Covid-19 before receiving the vaccine.
+
+```{r, echo=FALSE}
+ggplot(janssen, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
+  ggtitle('Most Common Symptoms from Janssen Vaccine') +
+  xlab('Symptom') + ylab('Count')
+```
+
+Finally, we looked at the Janssen vaccine (also known as Johnson & Johnson's vaccine). Although there is less data than the Moderna and Pfizer vaccinations, we again found a similar trend in the symptoms. Like the previous vaccines, chills was the most commonly reported vaccine, which 361 patients experienced after the Janssen vaccine. The remaining top symptoms, including arthralgia, fatigue, pyrexia (fever), and headaches, were reported at a much lower count.
+
+**What age group has experienced the most symptoms after the vaccine?**
+
+```{r, echo=FALSE}
+# joining general patient data and vax data
+age <- VAERSdata %>% full_join(VAERSVax, by = 'VAERS_ID') %>%
+  select(VAERS_ID, VAX_MANU, AGE_YRS)
+# adding 10 year age group column to sort ages
+age <- age %>%
+  mutate(AGE_GROUP = ifelse(AGE_YRS %in% 0:18, '0 to 18',
+                     ifelse(AGE_YRS %in% 19:29, '19 to 29',
+                     ifelse(AGE_YRS %in% 30:39, '30 to 39',
+                     ifelse(AGE_YRS %in% 40:49, '40 to 49',
+                     ifelse(AGE_YRS %in% 50:59, '50 to 59',
+                     ifelse(AGE_YRS %in% 60:69, '60 to 69',
+                     ifelse(AGE_YRS %in% 70:79, '70 to 79',
+                     ifelse(AGE_YRS %in% 80:89, '80 to 89', 'Over 90')))))))))
+# plotting visual representation
+ggplot(age, aes(x = AGE_GROUP)) + geom_bar(fill = 'darkslateblue') +
+  ggtitle('Number of Vaccinations per Age Groups') +
+  xlab('Age Group (years)') + ylab('Count')
+```
+
+To determine if there was a correlation between age and the likelihood of experiencing symptoms, we joined the VAERS data with the VAERS Vaccine data and split the patients into different age groups. This returned a graph with the counts of people who have experienced symptoms in each age group (divided into people under 18 followed by 10 year increments). We found that the people between 30 and 39 years old had experienced the most symptoms compared to other ages (6,083 people). On the other hand, only 242 people aged 18 years and younger were reported to have experienced symptoms. However, the low number of observations may be due to the fact that many younger people weren't eligible for the vaccine for the first few months of distribution because older people and those with health conditions were prioritized first, so there might just be a lack of data. Finally, when looking at the overall trend of the bar graph, we notice a sharp increase to the '30 to 39' age group followed by a gradual decline until it increases at the 'Over 90' group which is everyone over 99 years old that experienced symptoms.
 
 **How does a patient's medical history compare to their symptoms after receiving the vaccine?**
 
