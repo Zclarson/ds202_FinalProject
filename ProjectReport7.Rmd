@@ -1,26 +1,94 @@
 ---
-title: "ProjectReport7.Rmd"
-author: "Dana Thacker"
-date: "5/2/2021"
+title: "Title"
+author: "Andrew Fahmy, Zack Larson, Julia Lundstrum, Nikole Slinger, Dana Thacker"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+library(ggthemes)
+library(mapproj)
+
+raw_data <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='raw_data')
+VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA')
+VAERSsymptoms <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSSymptoms')
+VAERSVax <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSVax')
+cdcdoses <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021AllVaccines')
+state <- map_data("state")
+abbrev <- read.csv("csvData.csv", stringsAsFactors = FALSE)
 ```
 
-1) Which states have the highest and lowest number of Covid cases and fatality rate?
+### Introduction
 
-2) What is the most popular vaccine manufacturer per state?
 
-3) Compare Covid cases per state in contrast to the number of vaccines administered by state.
 
-4) What age group has gotten the most vaccines?
+### Background Information
+(Not sure if we want to add a part for this)
 
-5) What's the most common symptom to experience for each manufacturer?
 
-6) Compare a patient's medical history with their symptoms from the vaccine they received.
+### Research Questions
 
-7) Is there a trend on the number of reported adverse effect from vaccines administered per day? By state and nation wide?
+- Which states have the highest and lowest number of Covid-19 cases and fatality rates?
+- What is the most popular vaccine manufacturer in each state?
+- How do Covid-19 cases compare to the number of vaccines administered per state?
+- What age group has recieved the most vaccines?
+- What is the most common symptom to experience for each manufacturer?
+- How does a patient's medical history compare to their symptoms after receiving the vaccine?
+- What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?
+- What patterns are shown when looking at a patient's death (post-vaccinnation) and the reasons why they might have died?
 
-8) What patterns are shown when looking at a patient's death (post vaccine) and the reasons why they might have died?
+### Obtaining and Cleaning the Data
+
+
+
+### Exploratory Analysis
+
+**Which states have the highest and lowest number of Covid-19 cases and fatality rates?**
+
+
+**What is the most popular vaccine manufacturer in each state?**
+
+
+**How do Covid-19 cases compare to the number of vaccines administered per state?**
+
+
+**What age group has recieved the most vaccines?**
+
+
+**What is the most common symptom to experience for each manufacturer?**
+
+
+**How does a patient's medical history compare to their symptoms after receiving the vaccine?**
+
+
+**What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?**
+
+
+**What patterns are shown when looking at a patient's death (post-vaccinnation) and the reasons why they might have died?**
+
+
+### Challenges Faced
+
+
+
+### Conclusion
+
+
+
+### Personal Contributions
+
+
+
+### Works Cited
+
+
+
+
+
+
+
+
