@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 library(ggplot2)
 library(tidyverse)
@@ -34,7 +34,7 @@ Covid-19 has been on everyone's mind since it originally came to the United Stat
 - Which states have the highest and lowest number of Covid-19 cases and fatality rates?
 - What is the most popular vaccine manufacturer in each state?
 - How do Covid-19 cases compare to the number of vaccines administered per state?
-- What age group has recieved the most vaccines?
+- What age group has experienced the most symptoms after the vaccine?
 - What is the most common symptom to experience for each manufacturer?
 - How does a patient's medical history compare to their symptoms after receiving the vaccine?
 - What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?
@@ -53,7 +53,7 @@ Covid-19 has been on everyone's mind since it originally came to the United Stat
 
 When learning about the vaccine distribution, an important and interesting question is, what is the most popular vaccine manufacturer in each state? This question can give us a general idea of where each vaccine is being distributed the most heavily which could help us make connections to trends in later analysis. 
 
-```{r, echo=FALSE}
+```{r}
 # Joining vaccine dataset with 'data' dataset, only need state, ID number, and vaccine manufacturer
 #Summarizing such that the number of each type of vaccine will be counted in each state
 perState <- VAERSVax %>% full_join(VAERSdata) %>%
@@ -74,7 +74,7 @@ ggplot(topPerState, aes(x = VAX_MANU)) + geom_bar(fill = 'maroon') + xlab("Top V
 ```
 
 The first way we responded to this question was to create a barchart to show the number of states that each vaccine is the most widely distributed in. Moderna and Pfizer were the only two vaccine manufacturers that were the most commomly administered in each state which explains why these are the only two manufacturers on the above graph. From the graph, we can see that our analysis showed that Moderna is popular in a few more states than Pfizer is. Moderna is the most widely administered vaccine in 28 states compared to Pfizer being the most administered in only 23 states. Washington D.C. was included in our analysis as a separate region which is why we looked at what appears to be 51 states. 
-```{r, echo=FALSE}
+```{r}
 #Creating a Map visualization of which states have each vaccine as the top manufacturer based on number administered
 abbrev$State <- toupper(abbrev$State)
 
@@ -106,7 +106,7 @@ The second visualization tool we used to respond to this question is a map of th
 
 We then wanted to further explore the Covid-19 vaccine, specifically looking for the different symptoms that each vaccine is associated with. By joining the VAERS Vaccine data with the VAERS Symptoms data, we connected manufacturer's vaccine (Moderna, Pfizer, and Janssen) with the symptoms that patients had experienced afterwards. Rather than listing every possible symptom, we chose to focus on only the top five.
 
-```{r, echo=FALSE}
+```{r}
 # joining vax and symptom data, only need id, vaccine manu, and symptoms
 symptoms <- VAERSVax %>% full_join(VAERSsymptoms, by = 'VAERS_ID') %>%
   filter(VAX_TYPE == 'COVID19') %>%
@@ -131,7 +131,7 @@ ggplot(moderna, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
 
 Shown above are the reported symptoms after patients had received the Moderna vaccine. The most common symptom, chill, was reported by 1,476 people at the time our data was taken, while stiffness at the site of the vaccine injection (injection site erythema) was reported by 1,319 people. The remaining top symptoms include arthralgia (joint pain), headaches, and dizziness. Overall, symptoms from the Moderna vaccine seem relatively mild.
 
-```{r, echo=FALSE}
+```{r}
 ggplot(pfizer, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
   ggtitle('Most Common Symptoms from Pfizer Vaccine') +
   xlab('Symptom') + ylab('Count')
@@ -139,7 +139,7 @@ ggplot(pfizer, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
 
 When looking at the symptoms from the Pfizer vaccine pictured above, we found that the symptoms that people had experienced were somewhat similar to those from the Moderna vaccine. Again, the top symptom reported was chills with 1,421 counts, this time followed by 957 reports of arthralgia. The other top symptoms include headaches, dizziness, and Covid-19 itself which was an interesting observation. However, we can't assume Covid-19 in the patient was caused by the vaccine and one possible reason for this to occur as a symptom may have been that the patient already had Covid-19 before receiving the vaccine.
 
-```{r, echo=FALSE}
+```{r}
 ggplot(janssen, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'brown3') +
   ggtitle('Most Common Symptoms from Janssen Vaccine') +
   xlab('Symptom') + ylab('Count')
@@ -149,7 +149,7 @@ Finally, we looked at the Janssen vaccine (also known as Johnson & Johnson's vac
 
 **What age group has experienced the most symptoms after the vaccine?**
 
-```{r, echo=FALSE}
+```{r}
 # joining general patient data and vax data
 age <- VAERSdata %>% full_join(VAERSVax, by = 'VAERS_ID') %>%
   select(VAERS_ID, VAX_MANU, AGE_YRS)
@@ -175,7 +175,7 @@ To determine if there was a correlation between age and the likelihood of experi
 
 In addition to learning about the specific symptoms after receiving the vaccine and further analyzing the effects of age on experiencing symptoms, we wanted to discover whether there were common trends between a patient's medical history and symptoms that they experienced with the vaccine. 
 
-```{r, echo=FALSE}
+```{r}
 #Join VAERSsymptoms and VAERSdata, only need ID, all 5 symptoms, and patient history
 #Then cleaning the history column to create uniformity
 medHist <- VAERSsymptoms %>% full_join(VAERSdata) %>%
@@ -370,10 +370,11 @@ One of the first challenges that we faced was that our questions that we had pro
 
 The next challenge that we faced was working with the data. We used multiple different data sets, some of which had multiple different sheets. This meant that to answer the questions we had, a lot of the time we would have to combine data sets that had information that pertained to it. Many times that data was not in the same format, so we would have to mutate it into a format that match. Another issue with the data was that it was not always in a structured format. This meant that we had to parse the data manually and extract the important information in whatever format it was in. One example of this was in the data about the patients with Covid-19. We wanted to look at the symptoms that they had, but the all the information was notes from the doctors in a single string. The notes has not format or structure, so to get a list of symptoms we had to parse that string.
 
-
 ### Conclusion
 
+The Covid-19 pandemic has affected virtually everyone of all age groups on earth since March 2020. Children and teens couldn't attend school the way they normally would, adults struggled with the stresses of keeping themselves and their families healthy and unemployment, and older people had to take extra care to avoid the virus. These struggles led to a push for a vaccine as soon as possible but also as safe as possible. Fortunately, the first release of the Covid-19 vaccine arrived in December of 2020, about twelve months since the first Covid-19 case and nine months since the first lockdown in the United States, with it becoming more and more available to the general public in the U.S., although certainly not without some minor health complications.
 
+After comparing Covid-19 cases/deaths and vaccinations in each state in the U.S., we then began to look closer at the symptoms associated with each vaccine, along with any differences among age groups. According to our analyses, the Moderna, Pfizer, and Janssen vaccines had come with minor symptoms of their own, the most common including chills, arthralgia, and headaches. Additionally, we looked for trends between a patient's medical history and symptoms that they had experienced, along with any trends that may have occured by state. Finally, we looked deeper into our data and focused more on symptoms that correlated with patients who had died after receiving a vaccine, and found that these included weakness, cardiac arrest, difficulty breathing, and fever. Although there are definitely major symptoms associated with each manufacturer's vaccine, our study does not conclude that these are specifically caused by the Covid-19 vaccine. Because of this, we do encourage people to get vaccinated if they are able to do so, as the world would sooner be able to return to the "normal" everyone has been waiting for.
 
 ### Personal Contributions
 
