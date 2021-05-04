@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 library(ggplot2)
 library(tidyverse)
@@ -276,12 +276,100 @@ To learn more about the relationship between medical history and symptoms after 
 
 **What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?**
 
+To find if there are any trends in the data, we started off by joining the VAERSdata and the VAERSVax data in order to have both the date and the state in one data frame. Once we had all of the data columns we had to filter our any data that did not have to do with Covid-19. We also found that there were some dates from before 2018 that must have been mistakes to we also filtered those out.
+
+Now we could look into any trends in the number of reports based on the date. We started off using all the samples in order to get a graph of the trend nation wide.
+
+```{r}
+# Date frame that has vaccine date, and the state it was administered in
+vaxinfo <- VAERSdata %>%
+    inner_join(VAERSVax, by = "VAERS_ID") %>%
+    mutate(VAX_DATE = as.Date(VAX_DATE)) %>%
+    filter(VAX_TYPE == "COVID19",
+           VAX_DATE > as.Date("2018-01-01"),
+           !is.na(STATE)) %>%
+    select(VAERS_ID, VAX_DATE, STATE)
+
+
+# Data frame with total of report per day
+vaxinfo_daily <- vaxinfo %>%
+    group_by(VAX_DATE) %>%
+    summarise(DAILY_TOTAL = n())
+
+# Data frame with total of report per day based on state
+vaxinfo_daily_state <- vaxinfo %>%
+    group_by(VAX_DATE, STATE) %>%
+    summarise(DAILY_TOTAL = n())
+
+# Total number of reports per state, and peak date of reports
+vaxinfo_state <- vaxinfo %>%
+    group_by(STATE) %>%
+    summarise(TOTAL = n(), PEAK = mean(VAX_DATE))
+
+
+
+vaxinfo_daily %>%
+    filter(VAX_DATE > as.Date("2021-01-01")) %>%
+    ggplot(aes(x = VAX_DATE, y = DAILY_TOTAL, color = "red")) +
+    geom_line() +
+    xlab("Date") +
+    ylab("Number of reports") +
+    ggtitle("Reports of adverse effects from vaccines in 2021")
+```
+
+Now we wanted to see what the trends looked like on a state level. To do this we grouped the rows by state and could then plot a specific state. We decided to just look at the top 10 states that has the highest numbers of reports.
+
+```{r}
+sorted_states <- vaxinfo_state %>% arrange(TOTAL) %>% select(STATE, TOTAL)
+#tail(sorted_states, 10)
+
+vaxinfo_daily_state %>%
+    filter(VAX_DATE > as.Date("2020-12-01"), STATE %in% tail(sorted_states$STATE, 10)) %>%
+    ggplot(aes(x = VAX_DATE, y = DAILY_TOTAL, color = STATE)) +
+    geom_line() +
+    facet_wrap(.~STATE) +
+    xlab("Date reported") +
+    ylab("Daily cases reported") +
+    ggtitle("States with the most number of reports")
+```
+
+We also created a choropleth map to visualize the number of reports each state had, as well as a map to show when the peak date of the number of reports.
+
+```{r}
+# Get data in the same format so they can be joined
+cdcdoses1 <- cdcdoses %>%
+    mutate(State = tolower(State), Vaccinated = `Fully Vaccinated in March`)
+
+# Join state names, abbreviations, vaccine doses, and map data
+dat <- abbrev %>%
+    mutate(State = tolower(State)) %>%
+    left_join(state, by = c("State" = "region")) %>%
+    right_join(vaxinfo_state, by = c("Code" = "STATE")) %>%
+    right_join(cdcdoses1, by = "State")
+
+
+ggplot(dat, aes(x = long, y = lat)) +
+    geom_polygon(aes(group = group, fill = TOTAL / Vaccinated), color = "white", size = 0.1) +
+    scale_fill_gradient(low = "#01c40e", high = "#ff0000") +
+    coord_map() +
+    theme_map() +
+    ggtitle("Reports adjusted for number of vaccines administered")
+
+ggplot(dat, aes(x = long, y = lat, group = group, fill = PEAK)) +
+    geom_polygon(color = "white", size = 0.1) +
+    coord_map() +
+    theme_map() +
+    ggtitle("Peak date of reports")
+```
 
 **What patterns are shown when looking at a patient's death (post-vaccinnation) and the reasons why they might have died?**
 
 
 ### Challenges Faced
 
+One of the first challenges that we faced was that our questions that we had proposed did not line up with the data that we had. Once we had started doing data analysis we realized that what was in the data would not be able to answer the original question. In order to remedy that problem, we re-framed the original question so that we could answer it with the data that we had collected.
+
+The next challenge that we faced was working with the data. We used multiple different data sets, some of which had multiple different sheets. This meant that to answer the questions we had, a lot of the time we would have to combine data sets that had information that pertained to it. Many times that data was not in the same format, so we would have to mutate it into a format that match. Another issue with the data was that it was not always in a structured format. This meant that we had to parse the data manually and extract the important information in whatever format it was in. One example of this was in the data about the patients with Covid-19. We wanted to look at the symptoms that they had, but the all the information was notes from the doctors in a single string. The notes has not format or structure, so to get a list of symptoms we had to parse that string.
 
 
 ### Conclusion
