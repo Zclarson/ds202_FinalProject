@@ -31,6 +31,8 @@ Covid-19 has been on everyone's mind since it originally came to the United Stat
 
 ### Research Questions
 
+These questions help us better understand the newest developments in COVID-19 data in relation to vaccines along with addressing the popular concerns that are associated with the COVID-19 vaccine.
+
 - Which states have the highest and lowest number of Covid-19 cases and fatality rates?
 - What is the most popular vaccine manufacturer in each state?
 - How do Covid-19 cases compare to the number of vaccines administered per state?
@@ -38,7 +40,7 @@ Covid-19 has been on everyone's mind since it originally came to the United Stat
 - What is the most common symptom to experience for each manufacturer?
 - How does a patient's medical history compare to their symptoms after receiving the vaccine?
 - What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?
-- What patterns are shown when looking at a patient's death (post-vaccinnation) and the reasons why they might have died?
+- What patterns are shown when looking at a patient's death (post-vaccination) and the reasons why they might have died?
 
 ### Obtaining and Cleaning the Data
 
@@ -48,6 +50,51 @@ Covid-19 has been on everyone's mind since it originally came to the United Stat
 
 **Which states have the highest and lowest number of Covid-19 cases and fatality rates?**
 
+Before looking at Covid-19 vaccine data, we must first look at the U.S. map of Covid-19 cases and deaths.This will tell us how important the vaccine is for our country. It will also show where Covid-19 is contained the most and where it is uncontrolled the most. These maps give us an idea of which states might need a bigger supply of vaccines compared to others.
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE}
+##Column names were not ideal with numbers,commas,dashes
+raw_data2 <- raw_data
+names(raw_data2)<-str_replace_all(names(raw_data2), c(" " = "."))
+names(raw_data2)<-str_replace_all(names(raw_data2), c("," = "_"))
+names(raw_data2)<-str_replace_all(names(raw_data2), c("-19" = ""))
+
+#Get number of covid cases per state per 1 million people
+highestCovidCasesStates <- raw_data2
+highestCovidCasesStates$COVID.Cases.per.1_000_000.Population <- as.numeric(highestCovidCasesStates$COVID.Cases.per.1_000_000.Population)
+highestCovidCasesStates <- highestCovidCasesStates[order(highestCovidCasesStates$COVID.Cases.per.1_000_000.Population,decreasing = TRUE),]
+highestCovidCasesStates <- highestCovidCasesStates %>% filter(COVID.Cases.per.1_000_000.Population != 'N/A') %>%
+  select(Location,COVID.Cases.per.1_000_000.Population)
+
+#Join with state map data
+casesStateMap <- highestCovidCasesStates %>%
+  mutate("State Name" = tolower(`Location`)) %>%
+  right_join(state, by = c("State Name" = "region"))
+
+#Create map ggplot to show number of cases per 1 million per state color coded by severity
+ggplot(casesStateMap, aes(x=long, y = lat, fill=COVID.Cases.per.1_000_000.Population)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 1,000,000 People by State")
+```
+
+  The map shown above displays the number of Covid-19 cases per state per one million with the darker shaded states have more than the lighter shaded states. First we see that North Dakota, South Dakota, Rhode Island, Utah, and Tennessee are among the states with the highest number of Covid-19 cases per one million while Hawaii, Vermont, Puerto Rico, Maine, and Oregon are among the states with the lowest number of cases. To get this map, we first had to manipulate the column names so we could use the columns how we wanted to. Then we ordered the states by the number of Covid-19 cases per one million to see the numeric data. After doing this and joining that data with the states data to create the ggplot map of the above data.
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE}
+#Get number of covid deaths per state per 1 million people
+highestCovidDeathsStates <- raw_data2
+highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population <- as.numeric(highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population)
+highestCovidDeathsStates <- highestCovidDeathsStates[order(highestCovidDeathsStates$COVID.Deaths.per.1_000_000.Population,decreasing = TRUE),]
+highestCovidDeathsStates <- highestCovidDeathsStates %>% filter(COVID.Deaths.per.1_000_000.Population != 'N/A') %>%
+  select(Location,COVID.Deaths.per.1_000_000.Population)
+
+#Join with state map data
+deathsStateMap <- highestCovidDeathsStates %>%
+  mutate("State Name" = tolower(`Location`)) %>%
+  right_join(state, by = c("State Name" = "region"))
+
+#Create map ggplot to show number of deaths per 1 million per state color coded by severity
+ggplot(deathsStateMap, aes(x=long, y = lat, fill=COVID.Deaths.per.1_000_000.Population)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Deaths per 1,000,000 People by State")
+```
+  
+  To get this map, we first had to manipulate the column names so we could use the columns how we wanted to. Then we ordered the states by the number of Covid-19 deaths per one million to see the numeric data. After doing this and joining that data with the states data, we create the ggplot map of the above data. When looking at these maps, we can see some distinct patterns that arise. First we see that New Jersey, New York, Massachusetts, Rhode Island, and Mississippi are among the states with the highest number of Covid-19 deaths per one million while Hawaii, Vermont, Alaska, Maine, and Oregon are among the states with the lowest number of deaths. One pattern found was that for the number of Covid-19 cases, the states with the most per one million were typically in the northwest or northeast parts of the country while the number of deaths per one million due to Covid-19 were much more dispersed throughout the U.S. We can also see that there was consistency among the states with the lowest number of cases also having the lowest number of deaths with Puerto Rico being the exception. This is not the case for the states with the highest number of cases because only Rhode Island appeared in the top 5 in both categories of cases and deaths. Using this info, we can almost expect the higher cases and deaths states to receive more vaccine supply distributed to them compared to other states.
 
 **What is the most popular vaccine manufacturer in each state?**
 
@@ -363,6 +410,40 @@ ggplot(dat, aes(x = long, y = lat, group = group, fill = PEAK)) +
 
 **What patterns are shown when looking at a patient's death (post-vaccinnation) and the reasons why they might have died?**
 
+Now that we have looked at how many people have experienced adverse effects from the vaccine since they have been released, we will now look at the data of people who died after receiving the vaccine and reported adverse effects from the vaccine. Doing this, we will analyze the reasons why they may have died and the relation of those reasons to the vaccine effects. We first had to filter the VAERSdata set to only look at people who have died. Then we looked at 3 main factors: Age, Gender, and symptoms experienced after the vaccine to see the commonalities among these people who died after receiving the vaccine. 
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE}
+#Age
+deathAfterVax <- VAERSdata %>% filter(DIED=='Y')
+deathAfterVaxAge <- deathAfterVax %>% count(AGE_YRS)
+ggplot(deathAfterVaxAge,aes(x=AGE_YRS,y=n)) + geom_col() + ggtitle("Deaths after Vaccine by Age") + xlab("Age") + ylab("Number of Deaths after receiving a vaccine")
+```
+
+  This graph shows the distribution of the number of people who died after receiving the vaccine by age. As you can see, the vast majority  of people who died are over the age of 75, so old age seems to be a factor for survival rate after the vaccine dose. 
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE}
+#Gender
+deathAfterVaxSex <- deathAfterVax %>% count(SEX) %>% filter(SEX !='U')
+ggplot(deathAfterVaxSex,aes(x=SEX,y=n)) + geom_col() + ggtitle("Deaths after Vaccine by Gender") + xlab("Gender") + ylab("Number of Deaths after receiving a vaccine")
+```
+
+  This graph shows the distribution of the number of people who died after receiving the vaccine by gender. As you can see, the majority of people who died are male, so gender seems to be a slight factor for survival rate after the vaccine dose. Some patients had an undefined gender so we kept those out of this data because it was just a small amount of people that most likely would not have a big impact on the results we found.
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE}
+#Common symptoms after vax in deaths
+deathSymptoms <- deathAfterVax %>% left_join(VAERSsymptoms, by = 'VAERS_ID') %>% group_by(VAERS_ID) %>%
+  select(VAERS_ID, AGE_YRS, SEX, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
+
+deathSymptoms1 <- deathSymptoms %>% count(SYMPTOM5) %>% arrange(desc(n), .by_group = TRUE)
+deathSymptoms1 <- as.data.frame(sort(table(deathSymptoms1$SYMPTOM5), decreasing = TRUE) [1:11])
+deathSymptoms1 <- deathSymptoms1[c(2,3,4,5,6,7,8,9,10,11),]#The other rows are unrelated symptoms to our research
+
+ggplot(deathSymptoms1, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'steelblue') +
+  ggtitle('Most Common Symptoms from People who died after receiving a Covid Vaccine') +
+  xlab('Symptom') + ylab('Count') + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+  This graph shows the distribution of the number of people who died after receiving the vaccine by symptom. The graph shows the top 10 symptoms experienced after the vaccine. We had to weed out a few of the results like 'Death' because that is already assumed given the data. There was also duplicate/similar data that we took into consideration. Some extra quick Google research had to be done to understand the medical terms used for the most common symptoms. For example, Dysponea means shortness of breath, Pyrexia means fever, Syncope meaning unconsciousness, and Hypoxia is insufficient oxygen supply. After understanding those, we concluded that the following 10 symptoms shown leads to a greater chance of death than other symptoms experienced after receiving the vaccine. In addition, being over the age of 75 and male puts you also at a greater risk to die after the vaccine.
 
 ### Challenges Faced
 
@@ -377,10 +458,14 @@ The Covid-19 pandemic has affected virtually everyone of all age groups on earth
 After comparing Covid-19 cases/deaths and vaccinations in each state in the U.S., we then began to look closer at the symptoms associated with each vaccine, along with any differences among age groups. According to our analyses, the Moderna, Pfizer, and Janssen vaccines had come with minor symptoms of their own, the most common including chills, arthralgia, and headaches. Additionally, we looked for trends between a patient's medical history and symptoms that they had experienced, along with any trends that may have occured by state. Finally, we looked deeper into our data and focused more on symptoms that correlated with patients who had died after receiving a vaccine, and found that these included weakness, cardiac arrest, difficulty breathing, and fever. Although there are definitely major symptoms associated with each manufacturer's vaccine, our study does not conclude that these are specifically caused by the Covid-19 vaccine. Because of this, we do encourage people to get vaccinated if they are able to do so, as the world would sooner be able to return to the "normal" everyone has been waiting for.
 
 ### Personal Contributions
-
-
+#### **Zack Larson**
+  I contributed to this project by first helping explore datasets for our topic along with coming up with research questions to use in our exploratory analysis. I completed the analysis on the number of Covid-19 cases and deaths per state along with analyzing what patterns are shown when looking at a patient's death (post-vaccination) including the reasons why they might have died. My work can be found under each of my commits to the master branch under my Github username Zclarson.
 
 ### Works Cited
+
+1. Covid cases by state: https://www.kff.org/other/state-indicator/cumulative-covid-19-cases-and-deaths/?currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D
+
+2. Covid Vaccine data(VAERS Data,Symptoms, and Vaccine datasets from 2021): https://vaers.hhs.gov/data/datasets.html?
 
 
 
