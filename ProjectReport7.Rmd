@@ -52,6 +52,53 @@ abbrev <- read.csv("csvData.csv", stringsAsFactors = FALSE)
 
 **What is the most popular vaccine manufacturer in each state?**
 
+When learning about the vaccine distribution, an important and interesting question is, what is the most popular vaccine manufacturer in each state? This question can give us a general idea of where each vaccine is being distributed the most heavily which could help us make connections to trends in later analysis. 
+
+```{r, echo=FALSE}
+# Joining vaccine dataset with 'data' dataset, only need state, ID number, and vaccine manufacturer
+#Summarizing such that the number of each type of vaccine will be counted in each state
+perState <- VAERSVax %>% full_join(VAERSdata) %>%
+  select(VAERS_ID, STATE, VAX_MANU) %>%
+  group_by(STATE, VAX_MANU) %>%
+  summarise(popular = n())
+
+#Selecting the top vaccine distributor for each state
+`%notin%` <- Negate(`%in%`)
+
+topPerState <- top_n(perState, 1) %>%
+  select(-popular)
+topPerState <- na.omit(topPerState) %>%
+  filter(STATE %notin% c('AS', 'Ca', 'FM', 'GU', 'MH', 'MP', 'PR', 'VI', 'XB'))
+
+#Visualizing what manufacturers are the most distributed in different states
+ggplot(topPerState, aes(x = VAX_MANU)) + geom_bar(fill = 'maroon') + xlab("Top Vaccine Manufacturers") + ylab("Number of States") + ggtitle("Number of States with Each Vaccine as the Most Distributed Vaccine")
+```
+
+The first way we responded to this question was to create a barchart to show the number of states that each vaccine is the most widely distributed in. Moderna and Pfizer were the only two vaccine manufacturers that were the most commomly administered in each state which explains why these are the only two manufacturers on the above graph. From the graph, we can see that our analysis showed that Moderna is popular in a few more states than Pfizer is. Moderna is the most widely administered vaccine in 28 states compared to Pfizer being the most administered in only 23 states. Washington D.C. was included in our analysis as a separate region which is why we looked at what appears to be 51 states. 
+```{r, echo=FALSE}
+#Creating a Map visualization of which states have each vaccine as the top manufacturer based on number administered
+abbrev$State <- toupper(abbrev$State)
+
+state1 <- state %>%
+  select(long, lat, region, group)
+
+state1$region <- toupper(state1$region)
+
+stAbbrev <- state1 %>% right_join(abbrev, by = c('region' = 'State'))
+stAbbrev <- stAbbrev %>%
+  select(-Abbrev)
+
+stAbbrevManu <- stAbbrev %>% right_join(topPerState, by = c('Code' = 'STATE'))
+
+stAbbrevManu <- stAbbrevManu %>%
+  mutate(VAX_MANU = as.factor(VAX_MANU))
+
+cols <- c("darkcyan","maroon")
+
+ggplot(stAbbrevManu, aes(x = long, y = lat)) + geom_polygon(aes(group = group, fill = VAX_MANU), color = 'grey75') + xlab("Longitude") + ylab("Latitude") + ggtitle("Top Vaccine Manufacturers by Number of Administered Doses per State") +   scale_fill_manual(values = cols) + coord_map()
+```
+
+The second visualization tool we used to respond to this question is a map of the United States with each state or district filled in by a color corresponding to Moderna or Pfizer. What we see from the map is that the vaccine manufacturers appear to be in groupings across the country, excluding a few outliers such as Minnesota, Pennsylvania, Florida, and Texas. Generally, the most common vaccine in the northern states is Moderna and the most common in the southern states is Pfizer. The first possible explanation for this trend is the location of the vaccine manufacturers. It is highly plausible that the nearest vaccine manufacturing plant to a state is the most common due to the lower costs and time of transportation and convenience. The second possible explanation involves the United States Center for Disease Control and Prevention (CDC). The CDC has had a very large part in the distribution of vaccines and they have made a lot of decisions about where and how to distribute the vaccines. It is very possible that the CDC sent large shipments of one vaccine to different areas which would explain the groupings of most common vaccines across the country.
 
 **How do Covid-19 cases compare to the number of vaccines administered per state?**
 
@@ -126,6 +173,105 @@ ggplot(age, aes(x = AGE_GROUP)) + geom_bar(fill = 'darkslateblue') +
 To determine if there was a correlation between age and the likelihood of experiencing symptoms, we joined the VAERS data with the VAERS Vaccine data and split the patients into different age groups. This returned a graph with the counts of people who have experienced symptoms in each age group (divided into people under 18 followed by 10 year increments). We found that the people between 30 and 39 years old had experienced the most symptoms compared to other ages (6,083 people). On the other hand, only 242 people aged 18 years and younger were reported to have experienced symptoms. However, the low number of observations may be due to the fact that many younger people weren't eligible for the vaccine for the first few months of distribution because older people and those with health conditions were prioritized first, so there might just be a lack of data. Finally, when looking at the overall trend of the bar graph, we notice a sharp increase to the '30 to 39' age group followed by a gradual decline until it increases at the 'Over 90' group which is everyone over 99 years old that experienced symptoms.
 
 **How does a patient's medical history compare to their symptoms after receiving the vaccine?**
+
+In addition to learning about the specific symptoms after receiving the vaccine and further analyzing the effects of age on experiencing symptoms, we wanted to discover whether there were common trends between a patient's medical history and symptoms that they experienced with the vaccine. 
+
+```{r, echo=FALSE}
+#Join VAERSsymptoms and VAERSdata, only need ID, all 5 symptoms, and patient history
+#Then cleaning the history column to create uniformity
+medHist <- VAERSsymptoms %>% full_join(VAERSdata) %>%
+  select(VAERS_ID, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5, HISTORY) %>%
+  separate(HISTORY, c('history1', 'history2', 'history3', 'history4', 'history5', 'history6', 'history7', 'history8',
+                      'history9', 'history10'), sep = ', ') %>%
+  mutate(history1 = tolower(history1),
+         history2 = tolower(history2),
+         history3 = tolower(history3),
+         history4 = tolower(history4),
+         history5 = tolower(history5),
+         history6 = tolower(history6),
+         history7 = tolower(history7),
+         history8 = tolower(history8),
+         history9 = tolower(history9),
+         history10 = tolower(history10))
+
+#Summarising medical history to find how often each history diagnosis appears in the dataset
+medHist2 <- medHist %>%
+  pivot_longer(history1:history10, names_to='histName', values_to='conditionHist') %>%
+  group_by(conditionHist) %>%
+  summarise(count = n())
+
+#Creating a negation of the %in% to use in analysis
+`%notin%` <- Negate(`%in%`)
+
+#Finding the top 10, not including 5 null or 'none', medical history conditions
+topHist <- top_n(medHist2, 18) %>%
+  filter(conditionHist %notin% c('none',
+  'comments: list of non-encoded patient relevant history: patient other relevant history 1: none', 'n/a', 'no',
+  'unknown', 'medical history/concurrent conditions: no adverse event (no reported medical history)'))
+topHist <- na.omit(topHist)
+
+topHist <- topHist %>%
+  mutate(conditionHist = if_else(conditionHist == 'htn', 'hypertension', conditionHist))
+
+topHist[8,2] <- topHist[8,2] + topHist[10,2]
+
+topHist <- topHist[-10, ]
+
+#Filtering the medical history dataset such that I only have the top 10 medical conditions and the covid vaccination symptoms of those conditions
+medHist3 <- medHist %>%
+  filter(history1 %in% c('anxiety', 'asthma', 'copd', 'depression', 'diabetes', 'gerd', 'high blood pressure',
+                         'hypertension', 'htn', 'hyperlipidemia', 'hypothyroidism')) %>%
+  select(-history2, -history3, -history4, -history5, -history6, -history7, -history8, -history9, -history10) %>%
+  rename('MedHist' = 'history1')
+
+medHist3 <- medHist3 %>%
+  mutate(MedHist = if_else(MedHist == 'htn', 'hypertension', MedHist))
+
+#Learning about what the top symptoms are for each medical history
+symptom1 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM1) %>%
+  summarise(symptomCount = n())
+symptom1 <- na.omit(symptom1)
+
+symptom2 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM2) %>%
+  summarise(symptomCount = n())
+symptom2 <- na.omit(symptom2)
+
+symptom3 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM3) %>%
+  summarise(symptomCount = n())
+symptom3 <- na.omit(symptom3)
+
+symptom4 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM4) %>%
+  summarise(symptomCount = n())
+symptom4 <- na.omit(symptom4)
+
+symptom5 <- medHist3 %>%
+  group_by(MedHist, SYMPTOM5) %>%
+  summarise(symptomCount = n())
+symptom5 <- na.omit(symptom5)
+
+#Selecting only the top symptom for each medical history condition for each symptom dataset
+symptom1 <- top_n(symptom1, 1)
+symptom2 <- top_n(symptom2, 1)
+symptom3 <- top_n(symptom3, 1)
+symptom4 <- top_n(symptom4, 1)
+symptom5 <- top_n(symptom5, 1)
+
+#Joining datasets to create only one symptom dataset with the top symptoms from each symptom 1-5
+allSympt <- symptom1 %>% full_join(symptom2)
+allSympt <- allSympt %>% full_join(symptom3)
+allSympt <- allSympt %>% full_join(symptom4)
+allSympt <- allSympt %>% full_join(symptom5)
+
+#Selecting only the top symptoms when comparing symptoms 1-5
+topAllSympt <- top_n(allSympt, 1, symptomCount) %>%
+  select(MedHist, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
+head(topAllSympt, 10)
+```
+To learn more about the relationship between medical history and symptoms after receiving the vaccine, we first had to make a decision about how to analyze the medical history. The dataset was not organized nicely such that running analysis on the medical history would be easy. The first step we took to clean the data is we had to separate the long strings of written notes about the history into categories called History1, History2,..., History10 so that we could have a more unified column of medical history. Then, we summarized to find the 10 most common medical history conditions. Those conditions were anxiety, asthma, chronic obstructive pulmonary disease (COPD), diabetes, gerd, high blood pressure, hyperlipidemia, hypertension, hypothyroidism, and depression. After finding the top 10 most common medical history conditions, we could look at the most common symptoms for those 10 conditions. This required us to manipulate the dataframe even further so that we could summarize by the most frequent symptoms in each of the symptom categories (1-5) and then compare the most common symptom among all 5 symptom categories. The result is printed in the table above. Chills was by far the most common symptom to experience when comparing the most common medical history conditions as out of the 10 conditions, 7 of the most common symptom was chills. The remaining three most common symptoms were death, injection site erythema, and headache. Another note about the most common symptoms is that 9 of the 10 most common symptoms to experience for each condition were found in the SYMPTOM1 column. This is most likely because the symptom that was either the most prominent or the only symptom was the first or only symptom recorded, causing it to appear in the SYMPTOM1 column in our analysis. 
 
 
 **What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?**
