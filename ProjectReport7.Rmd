@@ -12,6 +12,7 @@ library(tidyverse)
 library(readxl)
 library(ggthemes)
 library(mapproj)
+library(DT)
 
 raw_data <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='raw_data')
 VAERSdata <- readxl::read_xlsx("2021VaccineCovidData.xlsx", sheet='2021VAERSDATA')
@@ -151,7 +152,9 @@ ggplot(stAbbrevManu, aes(x = long, y = lat)) + geom_polygon(aes(group = group, f
 
 The second visualization tool we used to respond to this question is a map of the United States with each state or district filled in by a color corresponding to Moderna or Pfizer. What we see from the map is that the vaccine manufacturers appear to be in groupings across the country, excluding a few outliers such as Minnesota, Pennsylvania, Florida, and Texas. Generally, the most common vaccine in the northern states is Moderna and the most common in the southern states is Pfizer. The first possible explanation for this trend is the location of the vaccine manufacturers. It is highly plausible that the nearest vaccine manufacturing plant to a state is the most common due to the lower costs and time of transportation and convenience. The second possible explanation involves the United States Center for Disease Control and Prevention (CDC). The CDC has had a very large part in the distribution of vaccines and they have made a lot of decisions about where and how to distribute the vaccines. It is very possible that the CDC sent large shipments of one vaccine to different areas which would explain the groupings of most common vaccines across the country.
 
-**How do Covid-19 cases compare to the number of vaccines administered per state?**
+**How do Covid-19 cases compare to the number of people fully vaccinated per state?**
+
+We decided to investigate whether or not there was a correlation between the number of Covid-19 cases and the number of people fully vaccinated in each state. States' responses to the outbreak have varied significantly based on beliefs and leadership. 
 
 ```{r}
 cases <- raw_data %>%
@@ -162,9 +165,31 @@ casesmap <- cases %>%
   mutate("State Name" = tolower(`Location`)) %>%
   right_join(state, by = c("State Name" = "region"))
 ggplot(casesmap, aes(x=long, y = lat, fill = `Cases per 10,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 10,000 People by State")
+```
+
+This map reveals the total number of Covid-19 cases for each state since the pandemic began until March adjusted for population to show the number of cases per 10,000 people.
+
+```{r}
 ggplot(casesmap, aes(x=long, y = lat, fill = `Fully Vaccinated per 10,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("Number of People Fully Vaccinated per 10,000 by State")
 ```
 
+This map shows the total number of fully vaccinated people for each state as of March adjusted for population to show the number of cases per 10,000 people. The maps do appear to contrast each other in a lot of places, but some states such as South Dakota, have a high number of cases and a high number of vaccinations. There are a lot of different factors that can affect a state’s number of cases and the number of people they have been able to fully vaccinate.
+
+```{r}
+sortcase <- cases %>%
+  select('Location', 'Cases per 10,000')
+datatable(sortcase)
+```
+
+This is a sortable data table to show the states that have had the most and least cases for their relative population. North Dakota, South Dakota, and Rhode Island have the highest cases for their population. The Northern Mariana Islands, Hawaii, and Vermont have had the least cases for their population.
+
+```{r}
+sortvac <- cases %>%
+  select('Location', 'Fully Vaccinated per 10,000')
+datatable(sortvac)
+```
+
+This is a sortable data table to show the states that have the least fully vaccinated people for their relative population. Utah, Puerto Rico, and Georgia have the least fully vaccinated people. Alaska, Northern Mariana Islands, and New Mexico have the most fully vaccinated people. At this point, there does not seem to be as strong correlation between total vaccinations and total cases. There are several factors impacting the number of people each state had been able to get fully vaccinated. For example, Alaska got a much larger initial shipment and Puerto Rico had difficulties with transportation for their first shipments.
 
 **What is the most common symptom to experience for each manufacturer?**
 
