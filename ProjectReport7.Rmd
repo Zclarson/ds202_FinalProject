@@ -94,12 +94,12 @@ deathsStateMap <- highestCovidDeathsStates %>%
 #Create map ggplot to show number of deaths per 1 million per state color coded by severity
 ggplot(deathsStateMap, aes(x=long, y = lat, fill=COVID.Deaths.per.1_000_000.Population)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Deaths per 1,000,000 People by State")
 ```
-  
+
   To get this map, we first had to manipulate the column names so we could use the columns how we wanted to. Then we ordered the states by the number of Covid-19 deaths per one million to see the numeric data. After doing this and joining that data with the states data, we create the ggplot map of the above data. When looking at these maps, we can see some distinct patterns that arise. First we see that New Jersey, New York, Massachusetts, Rhode Island, and Mississippi are among the states with the highest number of Covid-19 deaths per one million while Hawaii, Vermont, Alaska, Maine, and Oregon are among the states with the lowest number of deaths. One pattern found was that for the number of Covid-19 cases, the states with the most per one million were typically in the northwest or northeast parts of the country while the number of deaths per one million due to Covid-19 were much more dispersed throughout the U.S. We can also see that there was consistency among the states with the lowest number of cases also having the lowest number of deaths with Puerto Rico being the exception. This is not the case for the states with the highest number of cases because only Rhode Island appeared in the top 5 in both categories of cases and deaths. Using this info, we can almost expect the higher cases and deaths states to receive more vaccine supply distributed to them compared to other states.
 
 **What is the most popular vaccine manufacturer in each state?**
 
-When learning about the vaccine distribution, an important and interesting question is, what is the most popular vaccine manufacturer in each state? This question can give us a general idea of where each vaccine is being distributed the most heavily which could help us make connections to trends in later analysis. 
+When learning about the vaccine distribution, an important and interesting question is, what is the most popular vaccine manufacturer in each state? This question can give us a general idea of where each vaccine is being distributed the most heavily which could help us make connections to trends in later analysis.
 
 ```{r}
 # Joining vaccine dataset with 'data' dataset, only need state, ID number, and vaccine manufacturer
@@ -121,7 +121,8 @@ topPerState <- na.omit(topPerState) %>%
 ggplot(topPerState, aes(x = VAX_MANU)) + geom_bar(fill = 'maroon') + xlab("Top Vaccine Manufacturers") + ylab("Number of States") + ggtitle("Number of States with Each Vaccine as the Most Distributed Vaccine")
 ```
 
-The first way we responded to this question was to create a barchart to show the number of states that each vaccine is the most widely distributed in. Moderna and Pfizer were the only two vaccine manufacturers that were the most commomly administered in each state which explains why these are the only two manufacturers on the above graph. From the graph, we can see that our analysis showed that Moderna is popular in a few more states than Pfizer is. Moderna is the most widely administered vaccine in 28 states compared to Pfizer being the most administered in only 23 states. Washington D.C. was included in our analysis as a separate region which is why we looked at what appears to be 51 states. 
+The first way we responded to this question was to create a barchart to show the number of states that each vaccine is the most widely distributed in. Moderna and Pfizer were the only two vaccine manufacturers that were the most commomly administered in each state which explains why these are the only two manufacturers on the above graph. From the graph, we can see that our analysis showed that Moderna is popular in a few more states than Pfizer is. Moderna is the most widely administered vaccine in 28 states compared to Pfizer being the most administered in only 23 states. Washington D.C. was included in our analysis as a separate region which is why we looked at what appears to be 51 states.
+
 ```{r}
 #Creating a Map visualization of which states have each vaccine as the top manufacturer based on number administered
 abbrev$State <- toupper(abbrev$State)
@@ -257,7 +258,7 @@ To determine if there was a correlation between age and the likelihood of experi
 
 **How does a patient's medical history compare to their symptoms after receiving the vaccine?**
 
-In addition to learning about the specific symptoms after receiving the vaccine and further analyzing the effects of age on experiencing symptoms, we wanted to discover whether there were common trends between a patient's medical history and symptoms that they experienced with the vaccine. 
+In addition to learning about the specific symptoms after receiving the vaccine and further analyzing the effects of age on experiencing symptoms, we wanted to discover whether there were common trends between a patient's medical history and symptoms that they experienced with the vaccine.
 
 ```{r}
 #Join VAERSsymptoms and VAERSdata, only need ID, all 5 symptoms, and patient history
@@ -354,7 +355,7 @@ topAllSympt <- top_n(allSympt, 1, symptomCount) %>%
   select(MedHist, SYMPTOM1, SYMPTOM2, SYMPTOM3, SYMPTOM4, SYMPTOM5)
 head(topAllSympt, 10)
 ```
-To learn more about the relationship between medical history and symptoms after receiving the vaccine, we first had to make a decision about how to analyze the medical history. The dataset was not organized nicely such that running analysis on the medical history would be easy. The first step we took to clean the data is we had to separate the long strings of written notes about the history into categories called History1, History2,..., History10 so that we could have a more unified column of medical history. Then, we summarized to find the 10 most common medical history conditions. Those conditions were anxiety, asthma, chronic obstructive pulmonary disease (COPD), diabetes, gerd, high blood pressure, hyperlipidemia, hypertension, hypothyroidism, and depression. After finding the top 10 most common medical history conditions, we could look at the most common symptoms for those 10 conditions. This required us to manipulate the dataframe even further so that we could summarize by the most frequent symptoms in each of the symptom categories (1-5) and then compare the most common symptom among all 5 symptom categories. The result is printed in the table above. Chills was by far the most common symptom to experience when comparing the most common medical history conditions as out of the 10 conditions, 7 of the most common symptom was chills. The remaining three most common symptoms were death, injection site erythema, and headache. Another note about the most common symptoms is that 9 of the 10 most common symptoms to experience for each condition were found in the SYMPTOM1 column. This is most likely because the symptom that was either the most prominent or the only symptom was the first or only symptom recorded, causing it to appear in the SYMPTOM1 column in our analysis. 
+To learn more about the relationship between medical history and symptoms after receiving the vaccine, we first had to make a decision about how to analyze the medical history. The dataset was not organized nicely such that running analysis on the medical history would be easy. The first step we took to clean the data is we had to separate the long strings of written notes about the history into categories called History1, History2,..., History10 so that we could have a more unified column of medical history. Then, we summarized to find the 10 most common medical history conditions. Those conditions were anxiety, asthma, chronic obstructive pulmonary disease (COPD), diabetes, gerd, high blood pressure, hyperlipidemia, hypertension, hypothyroidism, and depression. After finding the top 10 most common medical history conditions, we could look at the most common symptoms for those 10 conditions. This required us to manipulate the dataframe even further so that we could summarize by the most frequent symptoms in each of the symptom categories (1-5) and then compare the most common symptom among all 5 symptom categories. The result is printed in the table above. Chills was by far the most common symptom to experience when comparing the most common medical history conditions as out of the 10 conditions, 7 of the most common symptom was chills. The remaining three most common symptoms were death, injection site erythema, and headache. Another note about the most common symptoms is that 9 of the 10 most common symptoms to experience for each condition were found in the SYMPTOM1 column. This is most likely because the symptom that was either the most prominent or the only symptom was the first or only symptom recorded, causing it to appear in the SYMPTOM1 column in our analysis.
 
 
 **What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?**
@@ -447,7 +448,7 @@ ggplot(dat, aes(x = long, y = lat, group = group, fill = PEAK)) +
 
 **What patterns are shown when looking at a patient's death (post-vaccinnation) and the reasons why they might have died?**
 
-Now that we have looked at how many people have experienced adverse effects from the vaccine since they have been released, we will now look at the data of people who died after receiving the vaccine and reported adverse effects from the vaccine. Doing this, we will analyze the reasons why they may have died and the relation of those reasons to the vaccine effects. We first had to filter the VAERSdata set to only look at people who have died. Then we looked at 3 main factors: Age, Gender, and symptoms experienced after the vaccine to see the commonalities among these people who died after receiving the vaccine. 
+Now that we have looked at how many people have experienced adverse effects from the vaccine since they have been released, we will now look at the data of people who died after receiving the vaccine and reported adverse effects from the vaccine. Doing this, we will analyze the reasons why they may have died and the relation of those reasons to the vaccine effects. We first had to filter the VAERSdata set to only look at people who have died. Then we looked at 3 main factors: Age, Gender, and symptoms experienced after the vaccine to see the commonalities among these people who died after receiving the vaccine.
 
 ```{r, echo=FALSE, warning = FALSE, message = FALSE}
 #Age
@@ -456,7 +457,7 @@ deathAfterVaxAge <- deathAfterVax %>% count(AGE_YRS)
 ggplot(deathAfterVaxAge,aes(x=AGE_YRS,y=n)) + geom_col() + ggtitle("Deaths after Vaccine by Age") + xlab("Age") + ylab("Number of Deaths after receiving a vaccine")
 ```
 
-  This graph shows the distribution of the number of people who died after receiving the vaccine by age. As you can see, the vast majority  of people who died are over the age of 75, so old age seems to be a factor for survival rate after the vaccine dose. 
+  This graph shows the distribution of the number of people who died after receiving the vaccine by age. As you can see, the vast majority  of people who died are over the age of 75, so old age seems to be a factor for survival rate after the vaccine dose.
 
 ```{r, echo=FALSE, warning = FALSE, message = FALSE}
 #Gender
@@ -478,6 +479,7 @@ deathSymptoms1 <- deathSymptoms1[c(2,3,4,5,6,7,8,9,10,11),]#The other rows are u
 ggplot(deathSymptoms1, aes(x = Var1, weight = Freq)) + geom_bar(fill = 'steelblue') +
   ggtitle('Most Common Symptoms from People who died after receiving a Covid Vaccine') +
   xlab('Symptom') + ylab('Count') + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
 ```
 
   This graph shows the distribution of the number of people who died after receiving the vaccine by symptom. The graph shows the top 10 symptoms experienced after the vaccine. We had to weed out a few of the results like 'Death' because that is already assumed given the data. There was also duplicate/similar data that we took into consideration. Some extra quick Google research had to be done to understand the medical terms used for the most common symptoms. For example, Dysponea means shortness of breath, Pyrexia means fever, Syncope meaning unconsciousness, and Hypoxia is insufficient oxygen supply. After understanding those, we concluded that the following 10 symptoms shown leads to a greater chance of death than other symptoms experienced after receiving the vaccine. In addition, being over the age of 75 and male puts you also at a greater risk to die after the vaccine.
@@ -497,15 +499,22 @@ After comparing Covid-19 cases/deaths and vaccinations in each state in the U.S.
 ### Personal Contributions
 #### **Zack Larson**
   I contributed to this project by first helping explore datasets for our topic along with coming up with research questions to use in our exploratory analysis. I completed the analysis on the number of Covid-19 cases and deaths per state along with analyzing what patterns are shown when looking at a patient's death (post-vaccination) including the reasons why they might have died. My work can be found under each of my commits to the master branch under my Github username Zclarson.
+<<<<<<< HEAD
   
 #### **Julia Lundstrum**
   I helped find and retrieve the data sets for us to use in our analysis. I also helped clean our data sets and combined them. I then came up with additional questions for us to explore in our analysis. I wrote the section about our data sets. I performed the analysis on the correlation between total Covid-19 cases and fully vaccinated people per state, also looking at possible reasonings behind the correlation. My commits can be seen on the Github repo by my username JL496.
   
+=======
+
+>>>>>>> a0bd308d67c490f33c64370512527a8b39a59346
 #### **Dana Thacker**
   My contributions to this project included helping to select the topic of Covid-19 Vaccine data and discussing with group members to decide specifically what questions to analyze. The questions I analyzed in RStudio were the distribution of vaccines among states and the relationship between a patient's medical history and their post-vaccine symptoms. I also played a large role in coordinating meetings outside of class via Zoom for our group to discuss our progress on the project. Finally, I compiled all of the group members pre-recorded videos discussing their questions for the presentation and created the final mp4 file that was presented to the class.
-  
+
 #### **Nikole Slinger**
   For this project, I contributed by helping search for and exploring the data sets to work with, coming up with questions for the group to answer, and helping with the project proposal. My analysis focused on searching for symptoms that each manufacturers' vaccine were correlated with and comparing them to each other. I also looked at different age groups and how they were affected differently and attempted to find explanations for these differences. Finally, I made connections and conclusions by combining what each of my groupmates found through their own analysis. My specific analysis can be found under my commits to the master branch under the Github username nikoles10.
+
+#### **Andrew Fahmy**
+  My contributions to the project was exploring the data to see how the number of reports of adverse effects from the Covid-19 vaccine trended by state and nation wide. This included preparing the data and getting it to a state so I could further analyze this question. Once I had the data ready, I created graphs and chloropleth maps in order to show the trends and have a nice visulization for the audience. Lastly, I talked about the different challenges that we had faced throughout this project and how we were able to over come them. You can see the history of my work on the Github repo, my username is ajfahmy.
 
 ### Works Cited
 
