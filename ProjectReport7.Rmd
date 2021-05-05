@@ -26,10 +26,6 @@ abbrev <- read.csv("csvData.csv", stringsAsFactors = FALSE)
 ### Introduction
 Covid-19 has been on everyone's mind since it originally came to the United States in the earlier months of 2020. In late 2020 and early 2021, the vaccine finished all clinical trials and phases of testing and distribution began, starting with the most vulnerable populations of people. The Covid-19 vaccines are groundbreaking because they are the fastest vaccines ever created. We decided to look at data regarding the COVID vaccines because this is the newest development in the pandemic, and as many individuals are getting the vaccine, there are many concerns about experiencing negative symptoms after receiving a dose. We specifically wanted to analyze general vaccine information, looking at the distribution of the vaccines and trends in the amount of vaccines administered and the timeline of administration. We also wanted to look into the symptoms that the COVID shots have been causing to see if we could discover any trends or correlations between the symptoms and various factors such as age and previous medical history.
 
-### Background Information
-(Not sure if we want to add a part for this)
-
-
 ### Research Questions
 
 These questions help us better understand the newest developments in COVID-19 data in relation to vaccines along with addressing the popular concerns that are associated with the COVID-19 vaccine.
@@ -43,7 +39,7 @@ These questions help us better understand the newest developments in COVID-19 da
 - What is the trend on the number of reported adverse effect from vaccines administered per day? Does the trend differ between states and nation wide?
 - What patterns are shown when looking at a patient's death (post-vaccination) and the reasons why they might have died?
 
-### Obtaining and Cleaning the Data
+### About the Data
 
 The VAERSdata, VAERSsymptoms, and VAERSVax data frames came from the [Vaccine Adverse Event Reporting System's (VAERS) website](https://vaers.hhs.gov/data/datasets.html?). Each of these had about 40,000 rows with information about patients' symptoms, their vaccination record, and patient history. When a patient receives a vaccine, they receive paperwork that includes information on reporting side effects to VAERS. The patient can do this themself or if they tell a medical professional about their side effects, the medical professional will report the side effects for the patient. There is no guarantee that all side effects have been reported. In addition, information on the patient's background and receiving the vaccine is verified, but the symptoms they experienced are generally not verified. When collected, the data had last been updated on March 26th, so the rest of our data was collected to match that date.
 
@@ -501,6 +497,9 @@ After comparing Covid-19 cases/deaths and vaccinations in each state in the U.S.
 ### Personal Contributions
 #### **Zack Larson**
   I contributed to this project by first helping explore datasets for our topic along with coming up with research questions to use in our exploratory analysis. I completed the analysis on the number of Covid-19 cases and deaths per state along with analyzing what patterns are shown when looking at a patient's death (post-vaccination) including the reasons why they might have died. My work can be found under each of my commits to the master branch under my Github username Zclarson.
+  
+#### **Julia Lundstrum**
+  I helped find and retrieve the data sets for us to use in our analysis. I also helped clean our data sets and combined them. I then came up with additional questions for us to explore in our analysis. I wrote the section about our data sets. I performed the analysis on the correlation between total Covid-19 cases and fully vaccinated people per state, also looking at possible reasonings behind the correlation. My commits can be seen on the Github repo by my username JL496.
   
 #### **Dana Thacker**
   My contributions to this project included helping to select the topic of Covid-19 Vaccine data and discussing with group members to decide specifically what questions to analyze. The questions I analyzed in RStudio were the distribution of vaccines among states and the relationship between a patient's medical history and their post-vaccine symptoms. I also played a large role in coordinating meetings outside of class via Zoom for our group to discuss our progress on the project. Finally, I compiled all of the group members pre-recorded videos discussing their questions for the presentation and created the final mp4 file that was presented to the class.
