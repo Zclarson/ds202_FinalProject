@@ -44,7 +44,11 @@ These questions help us better understand the newest developments in COVID-19 da
 
 ### Obtaining and Cleaning the Data
 
+The VAERSdata, VAERSsymptoms, and VAERSVax data frames came from the [Vaccine Adverse Event Reporting System's (VAERS) website](https://vaers.hhs.gov/data/datasets.html?). Each of these had about 40,000 rows with information about patients' symptoms, their vaccination record, and patient history. When a patient receives a vaccine, they receive paperwork that includes information on reporting side effects to VAERS. The patient can do this themself or if they tell a medical professional about their side effects, the medical professional will report the side effects for the patient. There is no guarantee that all side effects have been reported. In addition, information on the patient's background and receiving the vaccine is verified, but the symptoms they experienced are generally not verified. When collected, the data had last been updated on March 26th, so the rest of our data was collected to match that date.
 
+The raw_data data frame came from the [Kaiser Family Foundation's (KFF) website](https://www.kff.org/other/state-indicator/cumulative-covid-19-cases-and-deaths/?currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D). This gave information on the number of COVID-19 cases and the COVID-19 deaths for each state and some territories.
+
+The cdcdoses data frame was collected from the [Centers for Disease Control and Prevention's (CDC) website](https://data.cdc.gov/browse?category=Vaccinations) and the [Bureau of the Census' website](https://data.census.gov/cedsci/). The CDC's website included the number of fully vaccinated individuals for each state. The Bureau of the Census' website gave information on population. The Bureau of the Census makes reliable predictions for populations for each state by year that are constantly updated. The predicted populations for 2021 were used as official census results have not yet been released from the 2020 census.
 
 ### Exploratory Analysis
 
@@ -147,6 +151,18 @@ ggplot(stAbbrevManu, aes(x = long, y = lat)) + geom_polygon(aes(group = group, f
 The second visualization tool we used to respond to this question is a map of the United States with each state or district filled in by a color corresponding to Moderna or Pfizer. What we see from the map is that the vaccine manufacturers appear to be in groupings across the country, excluding a few outliers such as Minnesota, Pennsylvania, Florida, and Texas. Generally, the most common vaccine in the northern states is Moderna and the most common in the southern states is Pfizer. The first possible explanation for this trend is the location of the vaccine manufacturers. It is highly plausible that the nearest vaccine manufacturing plant to a state is the most common due to the lower costs and time of transportation and convenience. The second possible explanation involves the United States Center for Disease Control and Prevention (CDC). The CDC has had a very large part in the distribution of vaccines and they have made a lot of decisions about where and how to distribute the vaccines. It is very possible that the CDC sent large shipments of one vaccine to different areas which would explain the groupings of most common vaccines across the country.
 
 **How do Covid-19 cases compare to the number of vaccines administered per state?**
+
+```{r}
+cases <- raw_data %>%
+  inner_join(cdcdoses, by = c("Location" = "State")) %>%
+  mutate("Cases per 10,000" = `Number of COVID-19 Cases`/`Population`*10000) %>%
+  mutate("Fully Vaccinated per 10,000" = `Fully Vaccinated in March`/`Population`*10000)
+casesmap <- cases %>%
+  mutate("State Name" = tolower(`Location`)) %>%
+  right_join(state, by = c("State Name" = "region"))
+ggplot(casesmap, aes(x=long, y = lat, fill = `Cases per 10,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("COVID-19 Cases per 10,000 People by State")
+ggplot(casesmap, aes(x=long, y = lat, fill = `Fully Vaccinated per 10,000`)) + geom_polygon(aes(group=group)) + theme_map() + ggtitle("Number of People Fully Vaccinated per 10,000 by State")
+```
 
 
 **What is the most common symptom to experience for each manufacturer?**
@@ -468,7 +484,11 @@ After comparing Covid-19 cases/deaths and vaccinations in each state in the U.S.
 
 1. Covid cases by state: https://www.kff.org/other/state-indicator/cumulative-covid-19-cases-and-deaths/?currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D
 
-2. Covid Vaccine data(VAERS Data, Symptoms, and Vaccine datasets from 2021): https://vaers.hhs.gov/data/datasets.html?
+2. Covid Vaccine Side Effect data(VAERS Data, Symptoms, and Vaccine datasets from 2021): https://vaers.hhs.gov/data/datasets.html?
+
+3. Covid Fully Vaccinated Counts: https://data.cdc.gov/browse?category=Vaccinations
+
+4. Population Counts: https://data.census.gov/cedsci/
 
 
 

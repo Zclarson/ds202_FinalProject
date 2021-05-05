@@ -78,7 +78,6 @@ cases <- raw_data %>%
   inner_join(cdcdoses, by = c("Location" = "State")) %>%
   mutate("Cases per 10,000" = `Number of COVID-19 Cases`/`Population`*10000) %>%
   mutate("Fully Vaccinated per 10,000" = `Fully Vaccinated in March`/`Population`*10000)
-View(cases)
 casesmap <- cases %>%
   mutate("State Name" = tolower(`Location`)) %>%
   right_join(state, by = c("State Name" = "region"))
