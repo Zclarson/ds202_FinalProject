@@ -23,7 +23,7 @@ abbrev <- read.csv("csvData.csv", stringsAsFactors = FALSE)
 ```
 
 ### Introduction
-Covid-19 has been on everyone's mind since it originally came to the United States in the earlier months of 2020. In late 2020 and early 2021, the Covid-19 finished all clinical trials and phases of testing and distribution began, starting with the most vulnerable populations of people. The Covid-19 vaccines are groundbreaking because they are the fastest vaccines ever created. We decided to look at data regarding the COVID vaccines because this is the newest development in the pandemic, and as many individuals are getting the vaccine, there are many concerns about experiencing negative symptoms after receiving a dose. We specifically wanted to analyze general vaccine information, looking at the distribution of the vaccines and trends in the amount of vaccines administered and the timeline of administration. We also wanted to look into the symptoms that the COVID shots have been causing to see if we could discover any trends or correlations between the symptoms and various factors such as age and previous medical history.
+Covid-19 has been on everyone's mind since it originally came to the United States in the earlier months of 2020. In late 2020 and early 2021, the vaccine finished all clinical trials and phases of testing and distribution began, starting with the most vulnerable populations of people. The Covid-19 vaccines are groundbreaking because they are the fastest vaccines ever created. We decided to look at data regarding the COVID vaccines because this is the newest development in the pandemic, and as many individuals are getting the vaccine, there are many concerns about experiencing negative symptoms after receiving a dose. We specifically wanted to analyze general vaccine information, looking at the distribution of the vaccines and trends in the amount of vaccines administered and the timeline of administration. We also wanted to look into the symptoms that the COVID shots have been causing to see if we could discover any trends or correlations between the symptoms and various factors such as age and previous medical history.
 
 ### Background Information
 (Not sure if we want to add a part for this)
@@ -460,12 +460,15 @@ After comparing Covid-19 cases/deaths and vaccinations in each state in the U.S.
 ### Personal Contributions
 #### **Zack Larson**
   I contributed to this project by first helping explore datasets for our topic along with coming up with research questions to use in our exploratory analysis. I completed the analysis on the number of Covid-19 cases and deaths per state along with analyzing what patterns are shown when looking at a patient's death (post-vaccination) including the reasons why they might have died. My work can be found under each of my commits to the master branch under my Github username Zclarson.
+  
+#### **Dana Thacker**
+  My contributions to this project included helping to select the topic of Covid-19 Vaccine data and discussing with group members to decide specifically what questions to analyze. The questions I analyzed in RStudio were the distribution of vaccines among states and the relationship between a patient's medical history and their post-vaccine symptoms. I also played a large role in coordinating meetings outside of class via Zoom for our group to discuss our progress on the project. Finally, I compiled all of the group members pre-recorded videos discussing their questions for the presentation and created the final mp4 file that was presented to the class.
 
 ### Works Cited
 
 1. Covid cases by state: https://www.kff.org/other/state-indicator/cumulative-covid-19-cases-and-deaths/?currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D
 
-2. Covid Vaccine data(VAERS Data,Symptoms, and Vaccine datasets from 2021): https://vaers.hhs.gov/data/datasets.html?
+2. Covid Vaccine data(VAERS Data, Symptoms, and Vaccine datasets from 2021): https://vaers.hhs.gov/data/datasets.html?
 
 
 
